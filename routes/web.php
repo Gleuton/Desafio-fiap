@@ -11,7 +11,16 @@ $router->add(
     'get',
     '/',
     function () {
-        return View::render('layout');
+        return View::render('main');
+    },
+    [AuthMiddleware::class]
+);
+
+$router->add(
+    'get',
+    '/students',
+    function () {
+        return View::render('students');
     },
     [AuthMiddleware::class]
 );

@@ -10,7 +10,11 @@ RUN apk update && apk add --no-cache \
     g++ \
     make \
     $PHPIZE_DEPS \
-    linux-headers  # <--- Essencial para compilar o Xdebug
+    linux-headers
+
+RUN mkdir -p /var/www/public/js && \
+    chown -R nginx:nginx /var/www && \
+    chmod -R 755 /var/www
 
 # Instala extensões do PHP
 RUN docker-php-ext-install pdo pdo_mysql bcmath
@@ -35,6 +39,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY ./nginx/nginx.conf /etc/nginx/http.d/
 
 COPY . .
+
+RUN chown -R nginx:nginx /var/www/public && \
+    find /var/www/public -type d -exec chmod 755 {} \; && \
+    find /var/www/public -type f -exec chmod 644 {} \; && \
+    chmod -R 755 /var/www/public/js
+
+
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 
