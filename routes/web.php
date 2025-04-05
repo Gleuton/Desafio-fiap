@@ -1,7 +1,7 @@
 <?php
 
 use Core\View;
-use FiapAdmin\Middleware\AuthMiddleware;
+use FiapAdmin\Middlewares\AuthMiddleware;
 
 /**
  * @var $router

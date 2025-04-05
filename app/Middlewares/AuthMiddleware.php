@@ -1,6 +1,6 @@
 <?php
 
-namespace FiapAdmin\Middleware;
+namespace FiapAdmin\Middlewares;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
