@@ -1,0 +1,31 @@
+services:
+  fiap-app:
+    build: ./.docker
+    ports:
+      - "8909:80"
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql-fiap
+    networks:
+      - development-network
+
+  mysql-fiap:
+    image: mysql:8.3
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "fiap"
+      MYSQL_USER: "developer"
+      MYSQL_PASSWORD: "developer"
+      MYSQL_ROOT_PASSWORD: "developer"
+    ports:
+      - "33061:3306"
+    networks:
+      - development-network
+
+networks:
+  development-network:
+
+volumes:
+  dbdata:

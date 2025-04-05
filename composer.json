@@ -1,0 +1,35 @@
+{
+    "name": "gleuton/fiap-admin",
+    "description": "Desafio Técnico FIAP",
+    "authors": [
+        {
+            "name": "Gleuton Dutra",
+            "email": "gleuton.dutra@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "FiapAdmin\\": "app/",
+            "Core\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.4",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "psr/http-message": "^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "laminas/laminas-diactoros": "^3.5",
+        "laminas/laminas-httphandlerrunner": "^2.11"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest",
+        "phpunit/phpunit": "^12.1"
+    }
+}
