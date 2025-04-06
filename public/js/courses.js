@@ -32,6 +32,17 @@ function loadCourses(page = 1) {
 
 }
 
+function handleError(error, tableBody) {
+    console.error(error);
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="text-danger text-center">
+                Erro ao carregar Turmas. Verifique o console.
+            </td>
+        </tr>
+    `;
+}
+
 function renderCourses(data, page, tableBody) {
     const courses = data.courses;
     let html = "<tr><td colspan=\"5\" class=\"text-center\">Nenhuma turma encontrada.</td></tr>";
@@ -52,7 +63,7 @@ function renderCourses(data, page, tableBody) {
                                     data-bs-target="#courseModal"
                                     data-action="edit"
                                     data-id="${course.id}"
-                                >
+                                    onclick="prepareModal(${course.id})">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger" 
@@ -99,18 +110,18 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchCourse(id) {
-    const response = await fetch(`/api/course/${id}`);
+    const response = await fetch(`/api/courses/${id}`);
     return response.json();
 }
 
 function populateForm(data, form) {
     form.querySelector('#classId').value = data.id;
     form.querySelector('#className').value = data.name;
-    form.querySelector('#classDescription').value = data.birthdate;
+    form.querySelector('#classDescription').value = data.description;
 }
 
 function configureModal() {
-    const modal = document.getElementById('classModal');
+    const modal = document.getElementById('courseModal');
     modal.addEventListener('show.bs.modal', async (event) => {
         const formContainer = modal.querySelector('.modal-content');
         formContainer.innerHTML = await fetchForm();
@@ -126,7 +137,7 @@ function configureModal() {
 
         if (action === 'edit' && id) {
             try {
-                const data = await fetchStudent(id);
+                const data = await fetchCourse(id);
                 populateForm(data, form);
             } catch (error) {
                 console.error('Erro ao buscar Turma:', error);
@@ -163,9 +174,9 @@ async function handleSubmit(e) {
         });
 
         if (response.ok) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('classModal'));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('courseModal'));
             modal.hide();
-            loadStudents(document.getElementById('coursesTable'));
+            loadCourses();
         } else {
             const errors = await response.json();
             displayErrors(errors, form);

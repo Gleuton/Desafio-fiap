@@ -7,3 +7,14 @@ function resetFormValidation(form) {
         feedback.textContent = '';
     });
 }
+
+function displayErrors(errors, form) {
+    Object.entries(errors).forEach(([field, message]) => {
+        const input = form.querySelector(`[name="${field}"]`);
+        if (input) {
+            input.classList.add('is-invalid');
+            const feedback = input.closest('.mb-3').querySelector('.invalid-feedback');
+            if (feedback) feedback.textContent = message;
+        }
+    });
+}

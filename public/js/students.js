@@ -160,17 +160,6 @@ async function handleSubmit(e) {
     }
 }
 
-function displayErrors(errors, form) {
-    Object.entries(errors).forEach(([field, message]) => {
-        const input = form.querySelector(`[name="${field}"]`);
-        if (input) {
-            input.classList.add('is-invalid');
-            const feedback = input.closest('.mb-3').querySelector('.invalid-feedback');
-            if (feedback) feedback.textContent = message;
-        }
-    });
-}
-
 async function deleteStudent(id) {
     if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
 

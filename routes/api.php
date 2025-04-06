@@ -35,3 +35,22 @@ $router->add('GET', '/api/courses', function(ServerRequestInterface $request) {
     return new CourseController()->index($request);
 });
 
+$router->add('POST', '/api/courses', function (ServerRequestInterface $request) {
+    return new CourseController()->create($request);
+});
+
+$router->add('GET', '/api/courses/(\d+)', function(ServerRequestInterface $request, array $params) {
+    $id = (int)$params[1];
+    return new CourseController()->show($id);
+});
+
+$router->add('PUT', '/api/courses/(\d+)', function (ServerRequestInterface $request, array $params) {
+    $id = $params[1] ?? null;
+    return new CourseController()->update($request, $id);
+});
+
+$router->add('DELETE', '/api/courses/(\d+)', function(ServerRequestInterface $request, array $params) {
+    $id = (int)$params[1];
+    return new CourseController()->delete($id);
+});
+
