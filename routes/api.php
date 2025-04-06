@@ -12,9 +12,10 @@ $router->add('GET', '/api/students/(\d+)', function(ServerRequestInterface $requ
     return new StudentController()->show($id);
 });
 
-$router->add('GET', '/api/students', function() {
-    return new StudentController()->index();
+$router->add('GET', '/api/students', function(ServerRequestInterface $request, array $params) {
+    return new StudentController()->index($request);
 });
+
 $router->add('POST', '/api/students', function (ServerRequestInterface $request) {
     return new StudentController()->create($request);
 });

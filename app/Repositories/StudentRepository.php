@@ -94,4 +94,10 @@ class StudentRepository extends Repository
         $params = [$id];
         return $this->conn->query($sql, $params)[0]['total'] > 0;
     }
+
+    public function findAllByName(string $name): ?array
+    {
+        $nameSearch = '%' . trim($name) . '%';
+        return $this->searchBy('WHERE name like :name', ['name' => $nameSearch]);
+    }
 }

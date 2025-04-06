@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     configureModal(studentModal);
 });
 
-function loadStudents(tableBody) {
+function loadStudents(tableBody, searchTerm = "") {
     tableBody.innerHTML = `
         <tr>
             <td colspan="6" class="text-center">
@@ -15,7 +15,9 @@ function loadStudents(tableBody) {
         </tr>
     `;
 
-    fetch('/api/students')
+    const url = `/api/students${searchTerm ? `?name=${searchTerm}` : ""}`;
+
+    fetch(url)
         .then(response => response.json())
         .then(students => renderStudents(students, tableBody))
         .catch(error => handleError(error, tableBody));
@@ -194,4 +196,11 @@ async function deleteStudent(id) {
         console.error('Erro ao excluir:', error);
         alert('Erro ao excluir aluno. Verifique o console.');
     }
+}
+
+function handleSearch() {
+    const searchTerm = document.getElementById("searchInput").value.trim();
+    const tableBody = document.getElementById("alunosTable");
+
+    loadStudents(tableBody, searchTerm);
 }

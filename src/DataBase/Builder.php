@@ -43,6 +43,7 @@ class Builder
     public function findBy(string $sqlFragment, array $params = []): ?array
     {
         $sql = "SELECT * FROM $this->table $sqlFragment";
+
         $results = $this->query($sql, $params);
         return $results ? $results[0] : null;
     }
@@ -94,6 +95,14 @@ class Builder
     {
         $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :id";
         return $this->execute($sql, [':id' => $id]);
+    }
+
+    public function searchBy(string $sqlFragment, array $params): array
+    {
+        $sql = "SELECT * FROM $this->table $sqlFragment";
+
+        $results = $this->query($sql, $params);
+        return $results ?: [];
     }
 
     private function fillableData(array $data): array

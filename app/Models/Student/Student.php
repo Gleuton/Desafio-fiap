@@ -23,9 +23,12 @@ readonly class Student
         return $this->repository->findOneById($id);
     }
 
-    public function all(): array
+    public function all(?string $name): ?array
     {
-        return $this->repository->findAll();
+        if ($name === null) {
+            return $this->repository->findAll();
+        }
+        return $this->repository->findAllByName($name);
     }
 
     public function create(array $data): array
