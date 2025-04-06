@@ -74,7 +74,7 @@ class Builder
         return $success ? (int) $this->connection->lastInsertId() : null;
     }
 
-    public function update(string $id, array $data): bool
+    public function update(int $id, array $data): bool
     {
         $data = $this->fillableData($data);
         $data[$this->primaryKey] = $id;

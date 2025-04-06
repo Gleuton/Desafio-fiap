@@ -19,3 +19,8 @@ $router->add('POST', '/api/students', function (ServerRequestInterface $request)
     return new StudentController()->create($request);
 });
 
+$router->add('PUT', '/api/students/(\d+)', function (ServerRequestInterface $request, array $params) {
+    $id = $params[1] ?? null;
+    return new StudentController()->update($request, $id);
+});
+

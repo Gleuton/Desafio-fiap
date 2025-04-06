@@ -42,4 +42,20 @@ class StudentController
     {
         return new JsonResponse($this->student->findById($id));
     }
+
+    /**
+     * @throws JsonException
+     */
+    public function update(Request $request, ?int $id): Response
+    {
+        $body = $request->getBody();
+        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $result = $this->student->update($id, $data);
+
+        if (!$result['success']) {
+            return new JsonResponse($result['errors'], 422);
+        }
+
+        return new JsonResponse($result, 201);
+    }
 }

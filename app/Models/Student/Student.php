@@ -18,6 +18,11 @@ class Student
         $this->roleRepository = new RoleRepository();
     }
 
+    public function findById(int $id): array
+    {
+        return $this->repository->findOneById($id);
+    }
+
     public function all(): array
     {
         return $this->repository->findAll();
@@ -25,7 +30,7 @@ class Student
 
     public function create(array $data): array
     {
-        $validation = $this->validator->validate($data);
+        $validation = $this->validator->validateCreate($data);
         if (!empty($validation)) {
             return ['success' => false, 'errors' => $validation];
         }
@@ -40,8 +45,20 @@ class Student
         ];
     }
 
-    public function findById(int $id): array
+    public function update(?int $id, array $data): array
     {
-       return $this->repository->findOneById($id);
+        $validation = $this->validator->validateUpdate($id, $data);
+        if (!empty($validation)) {
+            return ['success' => false, 'errors' => $validation];
+        }
+
+        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+
+        return [
+            'success' => $this->repository->update($id, $data),
+            'data' => $data
+        ];
     }
+
+
 }
