@@ -41,11 +41,6 @@ class Router implements RequestHandlerInterface
         return $this->run($request);
     }
 
-    public function getRoutes(): array
-    {
-        return $this->routes;
-    }
-
     private function forEachRoute(string $method, string $uri, ServerRequestInterface $request): ResponseInterface
     {
         foreach ($this->routes[$method] as $route => $data) {
@@ -87,5 +82,10 @@ class Router implements RequestHandlerInterface
         }
 
         throw new HttpException('Page not found', 404);
+    }
+
+    public function getRoutes(): array
+    {
+        return $this->routes;
     }
 }

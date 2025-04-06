@@ -8,13 +8,13 @@ class Builder
 {
     private string $table;
     private string $primaryKey = 'id';
-    private array $fillable = [];
+    public array $fillable = [];
 
     public function __construct(private readonly PDO $connection)
     {
     }
 
-    public function setTable($table): self
+    public function setTable(string $table): self
     {
         $this->table = $table;
         return $this;
@@ -26,77 +26,88 @@ class Builder
         return $this;
     }
 
-    public function setFillable(array $fillable): void
+    public function setFillable(array $fillable): self
     {
         $this->fillable = $fillable;
+        return $this;
     }
 
-    public function findById(string $id)
+    public function findById(int $id): ?array
     {
-        $sql = "SELECT * FROM $this->table WHERE $this->primaryKey = '$id'";
-
-        return $this->connection->query($sql)->fetchObject();
+        $sql = "SELECT * FROM $this->table WHERE $this->primaryKey = :id";
+        $results = $this->query($sql, [':id' => $id]);
+        return $results ? $results[0] : null;
     }
 
-    public function findBy(string $filters)
+    public function findBy(string $sqlFragment, array $params = []): ?array
     {
-        $sql = "SELECT * FROM {$this->table}";
-
-        $sql .= ' ' . $filters;
-
-        return $this->connection->query($sql)->fetchObject();
+        $sql = "SELECT * FROM $this->table $sqlFragment";
+        $results = $this->query($sql, $params);
+        return $results ? $results[0] : null;
     }
 
-    public function all(string $filter = ''): array
+    public function all(string $sqlFragment = '', array $params = []): array
     {
-        $sql = "SELECT * FROM {$this->table}";
-
-        if (!empty($filter)) {
-            $sql .= ' ' . $filter;
-        }
-
-        return $this->connection->query($sql)->fetchAll(PDO::FETCH_OBJ);
+        $sql = "SELECT * FROM $this->table $sqlFragment";
+        return $this->query($sql, $params);
     }
 
-    public function insert(array $data): bool
+    public function query(string $sql, array $params = []): array
+    {
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function insert(array $data): ?int
     {
         $data = $this->fillableData($data);
 
         $columns = implode(', ', array_keys($data));
-        $values = implode(', :', array_keys($data));
+        $values = ':' . implode(', :', array_keys($data));
 
-        $sql = "INSERT INTO $this->table ($columns) VALUES (:$values)";
+        $sql = "INSERT INTO $this->table ($columns) VALUES ($values)";
 
-        return $this->connection->prepare($sql)->execute($data);
+        $stmt = $this->connection->prepare($sql);
+        $success = $stmt->execute($data);
+        return $success ? (int) $this->connection->lastInsertId() : null;
     }
 
     public function update(string $id, array $data): bool
     {
         $data = $this->fillableData($data);
-        $columns = '';
+        $data[$this->primaryKey] = $id;
 
+        $setClauses = [];
         foreach (array_keys($data) as $key) {
-            $columns .= "$key=:$key,";
+            $setClauses[] = "$key = :$key";
         }
 
-        $data[$this->primaryKey] = $id;
-        $columns = substr($columns, 0, -1);
+        $sql = "UPDATE $this->table SET " . implode(', ', $setClauses);
+        $sql .= " WHERE $this->primaryKey = :$this->primaryKey";
 
-        $sql = "UPDATE $this->table SET $columns";
-        $sql .= " WHERE $this->primaryKey=:$this->primaryKey";
-        return $this->connection->prepare($sql)->execute($data);
+        return $this->execute($sql, $data);
     }
 
-    public function delete(string $id): void
+    public function delete(string $id): bool
     {
-        $sql = "DELETE FROM $this->table WHERE $this->primaryKey = ?";
-        $this->connection->prepare($sql)->execute([$id]);
+        $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :id";
+        return $this->execute($sql, [':id' => $id]);
     }
 
     private function fillableData(array $data): array
     {
-        return array_filter($data, function ($key) {
-            return in_array($key, $this->fillable, true);
-        }, ARRAY_FILTER_USE_KEY);
+        return array_filter(
+            $data,
+            function ($key) {
+                return in_array($key, $this->fillable, true);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    private function execute(string $sql, array $params = []): bool
+    {
+        return $this->connection->prepare($sql)->execute($params);
     }
 }

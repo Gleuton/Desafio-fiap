@@ -1,7 +1,7 @@
 <?php
 
 use Core\View;
-use FiapAdmin\Middleware\AuthMiddleware;
+use FiapAdmin\Middlewares\AuthMiddleware;
 
 /**
  * @var $router
@@ -20,7 +20,15 @@ $router->add(
     'get',
     '/students',
     function () {
-        return View::render('students');
+        return View::render('students/list');
+    },
+    [AuthMiddleware::class]
+);
+$router->add(
+    'get',
+    '/students/form',
+    function () {
+        return View::render('students/form');
     },
     [AuthMiddleware::class]
 );
