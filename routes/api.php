@@ -24,3 +24,8 @@ $router->add('PUT', '/api/students/(\d+)', function (ServerRequestInterface $req
     return new StudentController()->update($request, $id);
 });
 
+$router->add('DELETE', '/api/students/(\d+)', function(ServerRequestInterface $request, array $params) {
+    $id = (int)$params[1];
+    return new StudentController()->delete($id);
+});
+

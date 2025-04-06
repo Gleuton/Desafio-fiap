@@ -90,7 +90,7 @@ class Builder
         return $this->execute($sql, $data);
     }
 
-    public function delete(string $id): bool
+    public function delete(int $id): bool
     {
         $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :id";
         return $this->execute($sql, [':id' => $id]);

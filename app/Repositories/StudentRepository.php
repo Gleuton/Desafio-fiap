@@ -22,7 +22,7 @@ class StudentRepository extends Repository
                 u.birthdate,
                 u.cpf,
                 u.email
-            FROM users u
+            FROM $this->table u
             INNER JOIN roles r ON u.role_id = r.id
             WHERE r.name = 'student'
             ORDER BY u.name ASC";
@@ -45,7 +45,7 @@ class StudentRepository extends Repository
     public function cpfExists(string $cpf, ?int $excludeId = null): bool
     {
         $sql = "SELECT COUNT(*) total
-            FROM users u
+            FROM $this->table u
             INNER JOIN roles r ON u.role_id = r.id
             WHERE u.cpf = ? 
             AND r.name = 'student'";
@@ -63,7 +63,7 @@ class StudentRepository extends Repository
     public function emailExists(string $email, ?int $excludeId = null): bool
     {
         $sql = "SELECT COUNT(*) total
-            FROM users u
+            FROM $this->table u
             INNER JOIN roles r ON u.role_id = r.id
             WHERE u.email = ? 
             AND r.name = 'student'";
@@ -82,5 +82,16 @@ class StudentRepository extends Repository
     {
         $fields = ['id', 'name', 'birthdate', 'cpf', 'email'];
         return $this->findById($id, $fields);
+    }
+
+    public function hasEnrollments(int $id): bool
+    {
+        $sql = "SELECT COUNT(*) total
+            FROM $this->table u
+            INNER JOIN enrollments e ON u.id =e.user_id
+            WHERE u.id = ?";
+
+        $params = [$id];
+        return $this->conn->query($sql, $params)[0]['total'] > 0;
     }
 }

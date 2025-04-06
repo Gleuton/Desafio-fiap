@@ -44,7 +44,8 @@ function renderStudents(students, tableBody) {
                 >
                     <i class="bi bi-pencil-square"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" disabled>
+                <button class="btn btn-sm btn-danger" 
+                        onclick="deleteStudent(${student.id})">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -175,4 +176,22 @@ function resetFormValidation(form) {
     form.querySelectorAll('.invalid-feedback').forEach(feedback => {
         feedback.textContent = '';
     });
+}
+
+async function deleteStudent(id) {
+    if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
+
+    try {
+        const response = await fetch(`/api/students/${id}`, { method: 'DELETE' });
+
+        if (response.ok) {
+            loadStudents(document.getElementById('alunosTable'));
+        } else {
+            const error = await response.json();
+            alert(`Erro: ${error.message}`);
+        }
+    } catch (error) {
+        console.error('Erro ao excluir:', error);
+        alert('Erro ao excluir aluno. Verifique o console.');
+    }
 }

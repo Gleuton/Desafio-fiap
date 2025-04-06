@@ -2,20 +2,23 @@
 
 namespace FiapAdmin\Models\Student;
 
+use FiapAdmin\Repositories\EnrollmentsRepository;
 use FiapAdmin\Repositories\RoleRepository;
 use FiapAdmin\Repositories\StudentRepository;
 
 class Student
 {
-    private StudentRepository $repository;
-    private StudentValidator $validator;
-    private RoleRepository $roleRepository;
+    private readonly StudentRepository $repository;
+    private readonly StudentValidator $validator;
+    private readonly RoleRepository $roleRepository;
+    private readonly EnrollmentsRepository $enrollmentsRepository;
 
     public function __construct()
     {
         $this->repository = new StudentRepository();
         $this->validator = new StudentValidator();
         $this->roleRepository = new RoleRepository();
+        $this->enrollmentsRepository = new EnrollmentsRepository();
     }
 
     public function findById(int $id): array
@@ -60,5 +63,20 @@ class Student
         ];
     }
 
+    public function delete(int $id): array {
+        $errors = [];
 
+        if ($this->repository->hasEnrollments($id)) {
+            $errors['enrollment'] = 'Aluno possui matrículas ativas e não pode ser excluído';
+        }
+
+        if (!empty($errors)) {
+            return ['success' => false, 'errors' => $errors];
+        }
+
+        return [
+            'success' => $this->repository->delete($id),
+            'id' => $id
+        ];
+    }
 }

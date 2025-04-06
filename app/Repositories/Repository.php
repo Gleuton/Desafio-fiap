@@ -37,5 +37,8 @@ abstract class Repository
         return $this->conn->findBy($sqlFragment, $params);
     }
 
-
+    public function delete(int $id): bool
+    {
+        return $this->conn->delete($id);
+    }
 }

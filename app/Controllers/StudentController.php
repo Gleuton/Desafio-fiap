@@ -58,4 +58,13 @@ class StudentController
 
         return new JsonResponse($result, 201);
     }
+
+    public function delete(int $id): Response
+    {
+        $result = $this->student->delete($id);
+        if (!$result['success']) {
+            return new JsonResponse($result['errors'], 422);
+        }
+        return new JsonResponse([], 201);
+    }
 }
