@@ -6,19 +6,17 @@ use FiapAdmin\Repositories\EnrollmentsRepository;
 use FiapAdmin\Repositories\RoleRepository;
 use FiapAdmin\Repositories\StudentRepository;
 
-class Student
+readonly class Student
 {
-    private readonly StudentRepository $repository;
-    private readonly StudentValidator $validator;
-    private readonly RoleRepository $roleRepository;
-    private readonly EnrollmentsRepository $enrollmentsRepository;
+    private StudentRepository $repository;
+    private StudentValidator $validator;
+    private RoleRepository $roleRepository;
 
     public function __construct()
     {
         $this->repository = new StudentRepository();
         $this->validator = new StudentValidator();
         $this->roleRepository = new RoleRepository();
-        $this->enrollmentsRepository = new EnrollmentsRepository();
     }
 
     public function findById(int $id): array
