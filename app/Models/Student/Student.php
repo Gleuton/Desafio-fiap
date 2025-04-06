@@ -2,7 +2,6 @@
 
 namespace FiapAdmin\Models\Student;
 
-use FiapAdmin\Repositories\EnrollmentsRepository;
 use FiapAdmin\Repositories\RoleRepository;
 use FiapAdmin\Repositories\StudentRepository;
 
