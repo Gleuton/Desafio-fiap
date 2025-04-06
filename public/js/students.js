@@ -37,7 +37,10 @@ function renderStudents(students, tableBody) {
             <td>
                 <button 
                     class="btn btn-sm btn-success" 
-                    onclick="prepareModal('edit', ${student.id})"
+                    data-bs-toggle="modal"
+                    data-bs-target="#studentModal"
+                    data-action="edit"
+                    data-id="${student.id}"
                 >
                     <i class="bi bi-pencil-square"></i>
                 </button>
@@ -67,8 +70,24 @@ function configureModal(modal) {
 
         const form = document.getElementById('studentForm');
         form.addEventListener('submit', handleSubmit);
+
+        const trigger = event.relatedTarget;
+        const action = trigger?.dataset.action || 'create';
+        const id = trigger?.dataset.id;
+
+        form.dataset.action = action;
+
+        if (action === 'edit' && id) {
+            try {
+                const data = await fetchStudent(id);
+                populateForm(data, form);
+            } catch (error) {
+                console.error('Erro ao buscar aluno:', error);
+            }
+        }
     });
 }
+
 
 async function fetchForm() {
     const response = await fetch('/students/form');
@@ -76,7 +95,6 @@ async function fetchForm() {
 }
 
 function prepareModal(action, id = null) {
-    const modal = document.getElementById('studentModal');
     const form = document.getElementById('studentForm');
 
     if (!form) return;
@@ -89,13 +107,17 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchStudent(id) {
-    const response = await fetch(`/students/${id}`);
+    const response = await fetch(`/api/students/${id}`);
     return response.json();
 }
 
 function populateForm(data, form) {
     form.querySelector('#studentId').value = data.id;
     form.querySelector('#name').value = data.name;
+    form.querySelector('#birthdate').value = data.birthdate;
+    form.querySelector('#cpf').value = data.cpf;
+    form.querySelector('#email').value = data.email;
+    form.querySelector('#password').value = '';
 
 }
 
@@ -107,10 +129,8 @@ async function handleSubmit(e) {
     const method = form.dataset.action === 'edit' ? 'PUT' : 'POST';
     const url = `/api/students${form.dataset.action === 'edit' ? '/' + formData.get('id') : ''}`;
 
-    // Limpa erros anteriores
     resetFormValidation(form);
 
-    // Validação Bootstrap
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;

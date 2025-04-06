@@ -37,4 +37,9 @@ class StudentController
 
         return new JsonResponse($result, 201);
     }
+
+    public function show(string $id): Response
+    {
+        return new JsonResponse($this->student->findById($id));
+    }
 }

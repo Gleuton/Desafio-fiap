@@ -32,9 +32,10 @@ class Builder
         return $this;
     }
 
-    public function findById(int $id): ?array
+    public function findById(int $id, array $fields = ['*']): ?array
     {
-        $sql = "SELECT * FROM $this->table WHERE $this->primaryKey = :id";
+        $fieldsString = implode(',', $fields);
+        $sql = "SELECT $fieldsString FROM $this->table WHERE $this->primaryKey = :id";
         $results = $this->query($sql, [':id' => $id]);
         return $results ? $results[0] : null;
     }

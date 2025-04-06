@@ -4,7 +4,6 @@ namespace FiapAdmin\Models\Student;
 
 use FiapAdmin\Repositories\RoleRepository;
 use FiapAdmin\Repositories\StudentRepository;
-use PHPUnit\TextUI\XmlConfiguration\Validator;
 
 class Student
 {
@@ -39,5 +38,10 @@ class Student
             'success' => $this->repository->insert($data),
             'data' => $data
         ];
+    }
+
+    public function findById(int $id): array
+    {
+       return $this->repository->findOneById($id);
     }
 }

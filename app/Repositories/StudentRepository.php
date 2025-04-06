@@ -57,4 +57,9 @@ class StudentRepository extends Repository
 
         return $this->conn->query($sql, [$email])[0]['total'] > 0;
     }
+    public function findOneById(int $id):array
+    {
+        $fields = ['id', 'name', 'birthdate', 'cpf', 'email'];
+        return $this->findById($id, $fields);
+    }
 }

@@ -27,9 +27,9 @@ abstract class Repository
         $this->conn->setFillable($this->fillable);
     }
 
-    public function findById(int $id): ?array
+    protected function findById(int $id, array $fields = ['*']): ?array
     {
-        return $this->conn->findById($id);
+        return $this->conn->findById($id, $fields);
     }
 
     public function findBy(string $sqlFragment, array $params = []): ?array
