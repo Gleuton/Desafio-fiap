@@ -42,6 +42,15 @@ $router->add(
     [AuthMiddleware::class]
 );
 
+$router->add(
+    'get',
+    '/courses/form',
+    function () {
+        return View::render('courses/form');
+    },
+    [AuthMiddleware::class]
+);
+
 $router->add('get', '/login', function () {
     return View::render('login');
 });

@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const tableBody = document.getElementById('alunosTable');
-    const studentModal = document.getElementById('studentModal');
-
-    loadStudents(tableBody);
-    configureModal(studentModal);
+    loadStudents();
+    configureModal();
 });
 
-function loadStudents(tableBody, searchTerm = "") {
+function loadStudents(searchTerm = "") {
+    const tableBody = document.getElementById('alunosTable');
     tableBody.innerHTML = `
         <tr>
             <td colspan="6" class="text-center">
@@ -28,8 +26,9 @@ function renderStudents(students, tableBody) {
         const [year, month, day] = date.split('-');
         return `${day}/${month}/${year}`;
     };
-
-    tableBody.innerHTML = students.map(student => `
+    tableBody.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">Nenhum aluno encontrada.</td></tr>";
+    if (students.length >= 1 ){
+        tableBody.innerHTML = students.map(student => `
         <tr>
             <td>${student.id}</td>
             <td>${student.name}</td>
@@ -53,6 +52,8 @@ function renderStudents(students, tableBody) {
             </td>
         </tr>
     `).join('');
+    }
+
 }
 
 function handleError(error, tableBody) {
@@ -66,7 +67,8 @@ function handleError(error, tableBody) {
     `;
 }
 
-function configureModal(modal) {
+function configureModal() {
+    const modal = document.getElementById('studentModal');
     modal.addEventListener('show.bs.modal', async (event) => {
         const formContainer = modal.querySelector('.modal-content');
         formContainer.innerHTML = await fetchForm();
@@ -121,7 +123,6 @@ function populateForm(data, form) {
     form.querySelector('#cpf').value = data.cpf;
     form.querySelector('#email').value = data.email;
     form.querySelector('#password').value = '';
-
 }
 
 async function handleSubmit(e) {
@@ -167,16 +168,6 @@ function displayErrors(errors, form) {
             const feedback = input.closest('.mb-3').querySelector('.invalid-feedback');
             if (feedback) feedback.textContent = message;
         }
-    });
-}
-
-function resetFormValidation(form) {
-    form.querySelectorAll('.is-invalid').forEach(input => {
-        input.classList.remove('is-invalid');
-    });
-
-    form.querySelectorAll('.invalid-feedback').forEach(feedback => {
-        feedback.textContent = '';
     });
 }
 

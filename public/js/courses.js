@@ -1,7 +1,11 @@
-function loadCourses(page = 1) {
-    const tableBody = document.getElementById("coursesTable");
-    const pagination = document.getElementById("pagination");
+document.addEventListener("DOMContentLoaded", () => {
+    configureModal();
+    loadCourses();
+});
 
+function loadCourses(page = 1) {
+
+    const tableBody = document.getElementById('coursesTable');
     tableBody.innerHTML = `
         <tr>
             <td colspan="5" class="text-center">
@@ -11,17 +15,31 @@ function loadCourses(page = 1) {
     `;
 
     const url = `/api/courses?page=${page}`;
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="text-center">
+                <div class="spinner-border text-primary" role="status"></div>
+            </td>
+        </tr>
+    `;
+
+
     fetch(url)
         .then(response => response.json())
-        .then(data => {
-            const courses = data.courses;
-            let html = "";
+        .then(data => renderCourses(data, page, tableBody))
+        .catch(error => handleError(error, tableBody));
 
-            if (courses.length === 0) {
-                html = `<tr><td colspan="5" class="text-center">Nenhuma turma encontrada.</td></tr>`;
-            } else {
-                courses.forEach(course => {
-                    html += `
+}
+
+function renderCourses(data, page, tableBody) {
+    const courses = data.courses;
+    let html = "<tr><td colspan=\"5\" class=\"text-center\">Nenhuma turma encontrada.</td></tr>";
+
+    if (courses.length >= 1) {
+        html = '';
+        courses.forEach(course => {
+            html += `
                         <tr>
                             <td>${course.id}</td>
                             <td>${course.name}</td>
@@ -44,13 +62,11 @@ function loadCourses(page = 1) {
                             </td>
                         </tr>
                     `;
-                });
-            }
+        });
+    }
 
-            tableBody.innerHTML = html;
-            updatePagination(data.totalPages, page);
-        })
-        .catch(error => console.error(error));
+    tableBody.innerHTML = html;
+    updatePagination(data.totalPages, page);
 }
 
 function updatePagination(totalPages, currentPage) {
@@ -70,51 +86,93 @@ function updatePagination(totalPages, currentPage) {
     pagination.innerHTML = html;
 }
 
-function prepareModal(action, data = null) {
-    const modalTitle = document.getElementById("modalLabel");
+function prepareModal(action, id = null) {
     const form = document.getElementById("classForm");
 
-    if (action === "create") {
-        modalTitle.textContent = "Nova Turma";
-        form.reset();
-        document.getElementById("classId").value = "";
-    } else if (action === "edit") {
-        modalTitle.textContent = "Editar Turma";
-        document.getElementById("classId").value = data.id;
-        document.getElementById("className").value = data.nome;
-        document.getElementById("classDescription").value = data.descricao;
+    if (!form) return;
+
+    if (action === "edit") {
+        fetchCourse(id)
+            .then(data => populateForm(data, form))
+            .catch(error => console.error('Erro ao buscar turma:', error));
     }
 }
 
-function saveCourse() {
-    const form = document.getElementById("classForm");
-    const formData = {
-        id: form.classId.value,
-        name: form.className.value,
-        description: form.classDescription.value
-    };
+async function fetchCourse(id) {
+    const response = await fetch(`/api/course/${id}`);
+    return response.json();
+}
 
-    if (formData.nome.length < 3) {
-        alert("O nome da turma deve ter pelo menos 3 caracteres (RN02).");
+function populateForm(data, form) {
+    form.querySelector('#classId').value = data.id;
+    form.querySelector('#className').value = data.name;
+    form.querySelector('#classDescription').value = data.birthdate;
+}
+
+function configureModal() {
+    const modal = document.getElementById('classModal');
+    modal.addEventListener('show.bs.modal', async (event) => {
+        const formContainer = modal.querySelector('.modal-content');
+        formContainer.innerHTML = await fetchForm();
+
+        const form = document.getElementById('classForm');
+        form.addEventListener('submit', handleSubmit);
+
+        const trigger = event.relatedTarget;
+        const action = trigger?.dataset.action || 'create';
+        const id = trigger?.dataset.id;
+
+        form.dataset.action = action;
+
+        if (action === 'edit' && id) {
+            try {
+                const data = await fetchStudent(id);
+                populateForm(data, form);
+            } catch (error) {
+                console.error('Erro ao buscar Turma:', error);
+            }
+        }
+    });
+}
+
+async function fetchForm() {
+    const response = await fetch('/courses/form');
+    return response.text();
+}
+
+async function handleSubmit(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const method = form.dataset.action === 'edit' ? 'PUT' : 'POST';
+    const url = `/api/courses${form.dataset.action === 'edit' ? '/' + formData.get('id') : ''}`;
+
+    resetFormValidation(form);
+
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
         return;
     }
 
-    const method = formData.id ? "PUT" : "POST";
-    const url = formData.id ? `/api/courses/${formData.id}` : "/api/courses";
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
 
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-        .then(response => response.json())
-        .then(() => {
-            loadCourses();
-            $('#classModal').modal('hide');
-        })
-        .catch(error => console.error(error));
+        if (response.ok) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('classModal'));
+            modal.hide();
+            loadStudents(document.getElementById('coursesTable'));
+        } else {
+            const errors = await response.json();
+            displayErrors(errors, form);
+        }
+    } catch (error) {
+        console.error('Erro ao salvar turma:', error);
+    }
 }
 
 function deleteCourse(id) {
@@ -126,7 +184,3 @@ function deleteCourse(id) {
             .catch(error => console.error(error));
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    loadCourses();
-});
