@@ -11,7 +11,7 @@ $router->add(
     'get',
     '/',
     function () {
-        return View::render('main');
+        return View::render('/main');
     },
     [AuthMiddleware::class]
 );
@@ -20,7 +20,15 @@ $router->add(
     'get',
     '/students',
     function () {
-        return View::render('students');
+        return View::render('students/list');
+    },
+    [AuthMiddleware::class]
+);
+$router->add(
+    'get',
+    '/students/form',
+    function () {
+        return View::render('students/form');
     },
     [AuthMiddleware::class]
 );

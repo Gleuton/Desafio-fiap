@@ -1,0 +1,44 @@
+<form id="studentForm" class="needs-validation" novalidate>
+    <input type="hidden" name="id" id="studentId">
+    <div class="modal-body">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="name" class="form-label">Nome *</label>
+                <input type="text" class="form-control" id="name" name="name"
+                       minlength="3" required>
+                <div class="invalid-feedback">Mínimo 3 caracteres</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="birthdate" class="form-label">Data Nascimento *</label>
+                <input type="date" class="form-control" id="birthdate" name="birthdate" required>
+                <div class="invalid-feedback">Data inválida</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="cpf" class="form-label">CPF *</label>
+                <input type="text" class="form-control" id="cpf" name="cpf"
+                       pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" required>
+                <div class="invalid-feedback">CPF inválido ou já cadastrado</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail *</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+                <div class="invalid-feedback">E-mail inválido ou já cadastrado</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha *</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <div class="invalid-feedback">Senha não atende aos requisitos</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </div>
+</form>
+
+

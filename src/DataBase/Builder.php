@@ -32,14 +32,14 @@ class Builder
         return $this;
     }
 
-    public function findById(string $id): ?object
+    public function findById(int $id): ?array
     {
         $sql = "SELECT * FROM $this->table WHERE $this->primaryKey = :id";
         $results = $this->query($sql, [':id' => $id]);
         return $results ? $results[0] : null;
     }
 
-    public function findBy(string $sqlFragment, array $params = []): ?object
+    public function findBy(string $sqlFragment, array $params = []): ?array
     {
         $sql = "SELECT * FROM $this->table $sqlFragment";
         $results = $this->query($sql, $params);
@@ -56,10 +56,10 @@ class Builder
     {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function insert(array $data): bool
+    public function insert(array $data): ?int
     {
         $data = $this->fillableData($data);
 
@@ -67,7 +67,10 @@ class Builder
         $values = ':' . implode(', :', array_keys($data));
 
         $sql = "INSERT INTO $this->table ($columns) VALUES ($values)";
-        return $this->execute($sql, $data);
+
+        $stmt = $this->connection->prepare($sql);
+        $success = $stmt->execute($data);
+        return $success ? (int) $this->connection->lastInsertId() : null;
     }
 
     public function update(string $id, array $data): bool

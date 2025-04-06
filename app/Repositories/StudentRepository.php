@@ -29,4 +29,32 @@ class StudentRepository extends Repository
 
         return $this->conn->query($sql);
     }
+
+    public function insert(array $data): array
+    {
+        $newId = $this->conn->insert($data);
+        return $this->findById($newId);
+    }
+
+    public function cpfExists(string $cpf): bool
+    {
+        $sql = "SELECT COUNT(*) total
+                FROM users u
+                INNER JOIN roles r ON u.role_id = r.id
+                WHERE u.cpf = ? 
+                AND r.name = 'student'";
+
+        return $this->conn->query($sql, [$cpf])[0]['total'] > 0;
+    }
+
+    public function emailExists(string $email): bool
+    {
+        $sql = "SELECT COUNT(*) total
+                FROM users u
+                INNER JOIN roles r ON u.role_id = r.id
+                WHERE u.email = ? 
+                AND r.name = 'student'";
+
+        return $this->conn->query($sql, [$email])[0]['total'] > 0;
+    }
 }

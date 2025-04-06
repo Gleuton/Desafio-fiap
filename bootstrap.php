@@ -1,10 +1,9 @@
 <?php
-
 use Core\Router;
-use Core\Exceptions\HttpException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
+use Core\Exceptions\HttpException;
 
 require_once __DIR__ . '/vendor/autoload.php';
 

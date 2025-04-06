@@ -26,4 +26,16 @@ abstract class Repository
         $this->conn->setPrimaryKey($this->primaryKey);
         $this->conn->setFillable($this->fillable);
     }
+
+    public function findById(int $id): ?array
+    {
+        return $this->conn->findById($id);
+    }
+
+    public function findBy(string $sqlFragment, array $params = []): ?array
+    {
+        return $this->conn->findBy($sqlFragment, $params);
+    }
+
+
 }

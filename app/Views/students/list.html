@@ -12,7 +12,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/">
+        <a class="navbar-brand fw-bold" href="/public">
             <i class="bi bi-building me-2"></i>FIAP Admin
         </a>
         <div class="d-flex align-items-center">
@@ -29,8 +29,11 @@
 <div class="container mt-5 pt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Gerenciamento de Alunos</h2>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
-            <i class="bi bi-plus-circle me-2"></i>Novo Aluno
+        <button class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#studentModal"
+                onclick="prepareModal('create')">
+            <i class="bi bi-plus-circle"></i> Novo Aluno
         </button>
     </div>
 
@@ -51,29 +54,9 @@
     </div>
 </div>
 
-<div class="modal fade" id="addModal" tabindex="-1">
+<div class="modal fade" id="studentModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cadastrar Aluno</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="/save-student" method="POST">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="nome" class="form-label">Nome *</label>
-                        <input type="text" class="form-control" id="nome" name="nome" required minlength="3">
-                    </div>
-                    <div class="mb-3">
-                        <label for="nascimento" class="form-label">Data de Nascimento *</label>
-                        <input type="date" class="form-control" id="nascimento" name="nascimento" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-custom">Salvar</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
