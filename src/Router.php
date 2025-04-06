@@ -13,7 +13,7 @@ use Laminas\Diactoros\Response\JsonResponse;
 
 class Router implements RequestHandlerInterface
 {
-    private array $routes;
+    private array $routes = [];
 
     public function add(string $method, string $pattern, callable $callback, array $middlewares = []): void
     {
@@ -82,5 +82,10 @@ class Router implements RequestHandlerInterface
         }
 
         throw new HttpException('Page not found', 404);
+    }
+
+    public function getRoutes(): array
+    {
+        return $this->routes;
     }
 }

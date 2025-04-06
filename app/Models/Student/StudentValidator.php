@@ -55,11 +55,6 @@ class StudentValidator
         return $errors;
     }
 
-    public function uniqueCpf():bool
-    {
-
-    }
-
     private function validateCPF(string $cpf): bool
     {
         $cpf = preg_replace('/[^0-9]/', '', $cpf);

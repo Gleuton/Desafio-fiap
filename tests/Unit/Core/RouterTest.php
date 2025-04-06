@@ -43,7 +43,7 @@ class RouterTest extends TestCase
         $callback = function () { return 'response'; };
         $this->router->add('GET', '/test', $callback);
 
-        $routes = $this->router;
+        $routes = $this->router->getRoutes();
         $this->assertArrayHasKey('get', $routes);
         $this->assertArrayHasKey('/^\/test$/', $routes['get']);
     }

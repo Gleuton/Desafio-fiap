@@ -11,7 +11,7 @@ $router->add(
     'get',
     '/',
     function () {
-        return View::render('/main');
+        return View::render('main');
     },
     [AuthMiddleware::class]
 );
