@@ -98,6 +98,7 @@ class StudentRepository extends Repository
     public function findAllByName(string $name): ?array
     {
         $nameSearch = '%' . trim($name) . '%';
+        $nameSearch = filter_var($nameSearch);
         return $this->searchBy('WHERE name like :name', ['name' => $nameSearch]);
     }
 }

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIAP Admin - Turmas</title>
+    <link rel="shortcut icon" href="https://www.fiap.com.br/imgs/favicon.ico"/>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-building me-2"></i>FIAP Admin
+        </a>
+        <div class="d-flex align-items-center">
+            <a href="#" class="btn btn-outline-light me-3">Usuário</a>
+            <a href="#" class="btn btn-danger">Sair</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Gerenciamento de Turmas</h2>
+        <button class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#classModal"
+                onclick="prepareModal('create')">
+            <i class="bi bi-plus-circle"></i> Nova Turma
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Alunos Matriculados</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody id="coursesTable"></tbody>
+        </table>
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+</div>
+
+<div class="modal fade" id="classModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="classForm">
+                    <input type="hidden" id="classId" name="id">
+                    <div class="mb-3">
+                        <label for="className" class="form-label">Nome da Turma</label>
+                        <input type="text" class="form-control" id="className" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="classDescription" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="classDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveClass()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/courses.js"></script>
+</body>
+</html>

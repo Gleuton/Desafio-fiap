@@ -1,5 +1,6 @@
 <?php
 
+use FiapAdmin\Controllers\CourseController;
 use FiapAdmin\Controllers\StudentController;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -28,5 +29,9 @@ $router->add('PUT', '/api/students/(\d+)', function (ServerRequestInterface $req
 $router->add('DELETE', '/api/students/(\d+)', function(ServerRequestInterface $request, array $params) {
     $id = (int)$params[1];
     return new StudentController()->delete($id);
+});
+
+$router->add('GET', '/api/courses', function(ServerRequestInterface $request) {
+    return new CourseController()->index($request);
 });
 

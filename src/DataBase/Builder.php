@@ -57,7 +57,12 @@ class Builder
     public function query(string $sql, array $params = []): array
     {
         $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
+
+        foreach ($params as $index => $param) {
+            $stmt->bindValue($index + 1, $param, is_int($param) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

@@ -33,6 +33,15 @@ $router->add(
     [AuthMiddleware::class]
 );
 
+$router->add(
+    'get',
+    '/courses',
+    function () {
+        return View::render('courses/list');
+    },
+    [AuthMiddleware::class]
+);
+
 $router->add('get', '/login', function () {
     return View::render('login');
 });
