@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     configureModal(studentModal);
 });
 
-function loadStudents(tableBody) {
+function loadStudents(tableBody, searchTerm = "") {
     tableBody.innerHTML = `
         <tr>
             <td colspan="6" class="text-center">
@@ -15,7 +15,9 @@ function loadStudents(tableBody) {
         </tr>
     `;
 
-    fetch('/api/students')
+    const url = `/api/students${searchTerm ? `?name=${searchTerm}` : ""}`;
+
+    fetch(url)
         .then(response => response.json())
         .then(students => renderStudents(students, tableBody))
         .catch(error => handleError(error, tableBody));
@@ -37,11 +39,15 @@ function renderStudents(students, tableBody) {
             <td>
                 <button 
                     class="btn btn-sm btn-success" 
-                    onclick="prepareModal('edit', ${student.id})"
+                    data-bs-toggle="modal"
+                    data-bs-target="#studentModal"
+                    data-action="edit"
+                    data-id="${student.id}"
                 >
                     <i class="bi bi-pencil-square"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" disabled>
+                <button class="btn btn-sm btn-danger" 
+                        onclick="deleteStudent(${student.id})">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -67,8 +73,24 @@ function configureModal(modal) {
 
         const form = document.getElementById('studentForm');
         form.addEventListener('submit', handleSubmit);
+
+        const trigger = event.relatedTarget;
+        const action = trigger?.dataset.action || 'create';
+        const id = trigger?.dataset.id;
+
+        form.dataset.action = action;
+
+        if (action === 'edit' && id) {
+            try {
+                const data = await fetchStudent(id);
+                populateForm(data, form);
+            } catch (error) {
+                console.error('Erro ao buscar aluno:', error);
+            }
+        }
     });
 }
+
 
 async function fetchForm() {
     const response = await fetch('/students/form');
@@ -76,7 +98,6 @@ async function fetchForm() {
 }
 
 function prepareModal(action, id = null) {
-    const modal = document.getElementById('studentModal');
     const form = document.getElementById('studentForm');
 
     if (!form) return;
@@ -89,13 +110,17 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchStudent(id) {
-    const response = await fetch(`/students/${id}`);
+    const response = await fetch(`/api/students/${id}`);
     return response.json();
 }
 
 function populateForm(data, form) {
     form.querySelector('#studentId').value = data.id;
     form.querySelector('#name').value = data.name;
+    form.querySelector('#birthdate').value = data.birthdate;
+    form.querySelector('#cpf').value = data.cpf;
+    form.querySelector('#email').value = data.email;
+    form.querySelector('#password').value = '';
 
 }
 
@@ -107,10 +132,8 @@ async function handleSubmit(e) {
     const method = form.dataset.action === 'edit' ? 'PUT' : 'POST';
     const url = `/api/students${form.dataset.action === 'edit' ? '/' + formData.get('id') : ''}`;
 
-    // Limpa erros anteriores
     resetFormValidation(form);
 
-    // Validação Bootstrap
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
         return;
@@ -155,4 +178,29 @@ function resetFormValidation(form) {
     form.querySelectorAll('.invalid-feedback').forEach(feedback => {
         feedback.textContent = '';
     });
+}
+
+async function deleteStudent(id) {
+    if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
+
+    try {
+        const response = await fetch(`/api/students/${id}`, { method: 'DELETE' });
+
+        if (response.ok) {
+            loadStudents(document.getElementById('alunosTable'));
+        } else {
+            const error = await response.json();
+            alert(`Erro: ${error.message}`);
+        }
+    } catch (error) {
+        console.error('Erro ao excluir:', error);
+        alert('Erro ao excluir aluno. Verifique o console.');
+    }
+}
+
+function handleSearch() {
+    const searchTerm = document.getElementById("searchInput").value.trim();
+    const tableBody = document.getElementById("alunosTable");
+
+    loadStudents(tableBody, searchTerm);
 }

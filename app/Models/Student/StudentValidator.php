@@ -7,12 +7,13 @@ use FiapAdmin\Repositories\StudentRepository;
 class StudentValidator
 {
     private StudentRepository $student;
+
     public function __construct()
     {
         $this->student = new StudentRepository();
     }
 
-    public function validate(array $data): array
+    public function validateCreate(array $data): array
     {
         $errors = [];
 
@@ -23,12 +24,51 @@ class StudentValidator
             }
         }
 
-        if ($this->student->cpfExists($data['cpf'])) {
+        if (!empty($errors)) {
+            return $errors;
+        }
+
+        return array_merge($errors, $this->validateCommon($data));
+    }
+
+    public function validateUpdate(?int $id, array $data): array
+    {
+        $errors = [];
+
+        if (is_null($id)) {
+            $errors['id'] = 'ID é obrigatório';
+        }
+
+        $required = ['name', 'birthdate', 'cpf', 'email'];
+        foreach ($required as $field) {
+            if (empty($data[$field])) {
+                $errors[$field] = ucfirst($field) . ' é obrigatório';
+            }
+        }
+
+        if (!empty($errors)) {
+            return $errors;
+        }
+
+        $errors = array_merge($errors, $this->validateCommon($data, $id));
+
+        if (!empty($data['password']) && !$this->validatePassword($data['password'])) {
+            $errors['password'] = 'Senha deve ter 8+ caracteres, com maiúsculas, minúsculas, números e símbolos';
+        }
+
+        return $errors;
+    }
+
+
+    private function validateCommon(array $data, $excludeId = null): array
+    {
+        $errors = [];
+
+        if ($this->student->cpfExists($data['cpf'], $excludeId)) {
             $errors['cpf'] = 'CPF já cadastrado';
         }
 
-
-        if ($this->student->emailExists($data['email'])) {
+        if ($this->student->emailExists($data['email'], $excludeId)) {
             $errors['email'] = 'E-mail já cadastrado';
         }
 
@@ -36,7 +76,7 @@ class StudentValidator
             $errors['name'] = 'Nome deve ter pelo menos 3 caracteres';
         }
 
-        if (isset($data['password']) && !$this->validatePassword($data['password'])) {
+        if (!empty($data['password']) && !$this->validatePassword($data['password'])) {
             $errors['password'] = 'Senha deve ter 8+ caracteres, com maiúsculas, minúsculas, números e símbolos';
         }
 
@@ -58,13 +98,17 @@ class StudentValidator
     private function validateCPF(string $cpf): bool
     {
         $cpf = preg_replace('/[^0-9]/', '', $cpf);
-        if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) return false;
+        if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) {
+            return false;
+        }
 
         for ($i = 0, $sum = 0, $weight = 10; $i < 9; $i++) {
             $sum += (int)$cpf[$i] * $weight--;
         }
         $checkDigit = ($sum % 11) < 2 ? 0 : 11 - ($sum % 11);
-        if ($checkDigit != $cpf[9]) return false;
+        if ($checkDigit != $cpf[9]) {
+            return false;
+        }
 
         for ($i = 0, $sum = 0, $weight = 11; $i < 10; $i++) {
             $sum += (int)$cpf[$i] * $weight--;
@@ -75,7 +119,7 @@ class StudentValidator
 
     private function validatePassword(string $password): bool
     {
-        return preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password);
+        return (bool) preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password);
     }
 
     private function validateDate(string $date): bool

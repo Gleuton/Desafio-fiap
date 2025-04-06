@@ -4,9 +4,8 @@ namespace FiapAdmin\Models\Student;
 
 use FiapAdmin\Repositories\RoleRepository;
 use FiapAdmin\Repositories\StudentRepository;
-use PHPUnit\TextUI\XmlConfiguration\Validator;
 
-class Student
+readonly class Student
 {
     private StudentRepository $repository;
     private StudentValidator $validator;
@@ -19,14 +18,22 @@ class Student
         $this->roleRepository = new RoleRepository();
     }
 
-    public function all(): array
+    public function findById(int $id): array
     {
-        return $this->repository->findAll();
+        return $this->repository->findOneById($id);
+    }
+
+    public function all(?string $name): ?array
+    {
+        if ($name === null) {
+            return $this->repository->findAll();
+        }
+        return $this->repository->findAllByName($name);
     }
 
     public function create(array $data): array
     {
-        $validation = $this->validator->validate($data);
+        $validation = $this->validator->validateCreate($data);
         if (!empty($validation)) {
             return ['success' => false, 'errors' => $validation];
         }
@@ -38,6 +45,38 @@ class Student
         return [
             'success' => $this->repository->insert($data),
             'data' => $data
+        ];
+    }
+
+    public function update(?int $id, array $data): array
+    {
+        $validation = $this->validator->validateUpdate($id, $data);
+        if (!empty($validation)) {
+            return ['success' => false, 'errors' => $validation];
+        }
+
+        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+
+        return [
+            'success' => $this->repository->update($id, $data),
+            'data' => $data
+        ];
+    }
+
+    public function delete(int $id): array {
+        $errors = [];
+
+        if ($this->repository->hasEnrollments($id)) {
+            $errors['enrollment'] = 'Aluno possui matrículas ativas e não pode ser excluído';
+        }
+
+        if (!empty($errors)) {
+            return ['success' => false, 'errors' => $errors];
+        }
+
+        return [
+            'success' => $this->repository->delete($id),
+            'id' => $id
         ];
     }
 }

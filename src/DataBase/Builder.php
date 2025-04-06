@@ -32,9 +32,10 @@ class Builder
         return $this;
     }
 
-    public function findById(int $id): ?array
+    public function findById(int $id, array $fields = ['*']): ?array
     {
-        $sql = "SELECT * FROM $this->table WHERE $this->primaryKey = :id";
+        $fieldsString = implode(',', $fields);
+        $sql = "SELECT $fieldsString FROM $this->table WHERE $this->primaryKey = :id";
         $results = $this->query($sql, [':id' => $id]);
         return $results ? $results[0] : null;
     }
@@ -42,6 +43,7 @@ class Builder
     public function findBy(string $sqlFragment, array $params = []): ?array
     {
         $sql = "SELECT * FROM $this->table $sqlFragment";
+
         $results = $this->query($sql, $params);
         return $results ? $results[0] : null;
     }
@@ -55,7 +57,12 @@ class Builder
     public function query(string $sql, array $params = []): array
     {
         $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
+
+        foreach ($params as $index => $param) {
+            $stmt->bindValue($index + 1, $param, is_int($param) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -73,7 +80,7 @@ class Builder
         return $success ? (int) $this->connection->lastInsertId() : null;
     }
 
-    public function update(string $id, array $data): bool
+    public function update(int $id, array $data): bool
     {
         $data = $this->fillableData($data);
         $data[$this->primaryKey] = $id;
@@ -89,10 +96,18 @@ class Builder
         return $this->execute($sql, $data);
     }
 
-    public function delete(string $id): bool
+    public function delete(int $id): bool
     {
         $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :id";
         return $this->execute($sql, [':id' => $id]);
+    }
+
+    public function searchBy(string $sqlFragment, array $params): array
+    {
+        $sql = "SELECT * FROM $this->table $sqlFragment";
+
+        $results = $this->query($sql, $params);
+        return $results ?: [];
     }
 
     private function fillableData(array $data): array

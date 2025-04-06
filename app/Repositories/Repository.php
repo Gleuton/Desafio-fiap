@@ -27,9 +27,9 @@ abstract class Repository
         $this->conn->setFillable($this->fillable);
     }
 
-    public function findById(int $id): ?array
+    protected function findById(int $id, array $fields = ['*']): ?array
     {
-        return $this->conn->findById($id);
+        return $this->conn->findById($id, $fields);
     }
 
     public function findBy(string $sqlFragment, array $params = []): ?array
@@ -37,5 +37,13 @@ abstract class Repository
         return $this->conn->findBy($sqlFragment, $params);
     }
 
+    public function searchBy(string $sqlFragment, array $params = []): ?array
+    {
+        return $this->conn->searchBy($sqlFragment, $params);
+    }
 
+    public function delete(int $id): bool
+    {
+        return $this->conn->delete($id);
+    }
 }

@@ -12,7 +12,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/public">
+        <a class="navbar-brand fw-bold" href="/">
             <i class="bi bi-building me-2"></i>FIAP Admin
         </a>
         <div class="d-flex align-items-center">
@@ -35,6 +35,17 @@
                 onclick="prepareModal('create')">
             <i class="bi bi-plus-circle"></i> Novo Aluno
         </button>
+    </div>
+
+    <div class="mb-3">
+        <label for="searchInput"></label><input
+                type="text"
+                class="form-control"
+                id="searchInput"
+                name="searchName"
+                placeholder="Buscar por nome..."
+                onkeyup="handleSearch()"
+        >
     </div>
 
     <div class="table-responsive">
