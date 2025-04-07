@@ -198,12 +198,26 @@ async function deleteStudent(id) {
         if (response.ok) {
             loadStudents();
         } else {
-            const error = await response.json();
-            alert(`Erro: ${error.message}`);
+            let errorMessage = 'Erro ao excluir aluno.';
+
+            if (response.status === 401) {
+                errorMessage = 'Não autorizado. Faça login novamente.';
+            } else if (response.status === 403) {
+                errorMessage = 'Você não tem permissão para excluir este aluno.';
+            } else {
+                try {
+                    const error = await response.json();
+                    errorMessage = error.message || errorMessage;
+                } catch (_) {
+                    // fallback silencioso se a resposta não for JSON
+                }
+            }
+
+            alert(errorMessage);
         }
     } catch (error) {
         console.error('Erro ao excluir:', error);
-        alert('Erro ao excluir aluno. Verifique o console.');
+        alert('Erro inesperado. Verifique sua conexão e tente novamente.');
     }
 }
 

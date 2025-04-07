@@ -6,7 +6,6 @@ use FiapAdmin\Repositories\AdminRepository;
 use FiapAdmin\Repositories\TokenRepository;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use RuntimeException;
 
 readonly class Admin
 {
