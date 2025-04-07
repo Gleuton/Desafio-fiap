@@ -246,14 +246,10 @@ async function deleteCourse(id) {
                 errorMessage = 'Não autorizado. Faça login novamente.';
             } else if (response.status === 403) {
                 errorMessage = 'Você não tem permissão para excluir esta turma.';
-            } else {
+            } else if (response.status === 422) {
                 try {
                     const errorData = await response.json();
-
-                    const firstErrorKey = Object.keys(errorData)[0];
-                    if (firstErrorKey) {
-                        errorMessage = errorData[firstErrorKey];
-                    }
+                    errorMessage = Object.values(errorData)[0] || errorMessage;
                 } catch (_) {
                 }
             }
@@ -265,4 +261,5 @@ async function deleteCourse(id) {
         alert('Erro inesperado. Verifique sua conexão e tente novamente.');
     }
 }
+
 

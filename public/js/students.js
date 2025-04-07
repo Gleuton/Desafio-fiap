@@ -204,12 +204,11 @@ async function deleteStudent(id) {
                 errorMessage = 'Não autorizado. Faça login novamente.';
             } else if (response.status === 403) {
                 errorMessage = 'Você não tem permissão para excluir este aluno.';
-            } else {
+            } else if (response.status === 422) {
                 try {
                     const error = await response.json();
-                    errorMessage = error.message || errorMessage;
+                    errorMessage = Object.values(error)[0] || errorMessage;
                 } catch (_) {
-                    // fallback silencioso se a resposta não for JSON
                 }
             }
 
@@ -220,6 +219,7 @@ async function deleteStudent(id) {
         alert('Erro inesperado. Verifique sua conexão e tente novamente.');
     }
 }
+
 
 function handleSearch() {
     const searchTerm = document.getElementById("searchInput").value.trim();
