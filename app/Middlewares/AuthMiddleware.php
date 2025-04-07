@@ -20,7 +20,11 @@ readonly class AuthMiddleware implements MiddlewareInterface
 
         try {
             $adminModel = new Admin();
-            $decoded = $adminModel->validateToken($token);
+            $decoded = $adminModel->isTokenValid($token);
+
+            if (!$decoded) {
+                return new JsonResponse(['error' => 'Token inválido ou sem permissão'], 401);
+            }
 
             $request = $request->withAttribute('admin', $decoded);
             return $handler->handle($request);

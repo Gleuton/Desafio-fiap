@@ -22,8 +22,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
+        logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+
+            const token = localStorage.getItem('token');
+
+            if (token) {
+                try {
+                    await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao deslogar:', error);
+                }
+            }
+
             localStorage.removeItem('token');
             window.location.href = '/login';
         });

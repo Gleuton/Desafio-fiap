@@ -37,11 +37,6 @@ abstract class Repository
         return $this->conn->findBy($sqlFragment, $params);
     }
 
-    public function searchBy(string $sqlFragment, array $params = []): ?array
-    {
-        return $this->conn->searchBy($sqlFragment, $params);
-    }
-
     public function delete(int $id): bool
     {
         return $this->conn->delete($id);

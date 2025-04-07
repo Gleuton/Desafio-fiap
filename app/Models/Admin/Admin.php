@@ -3,6 +3,7 @@
 namespace FiapAdmin\Models\Admin;
 
 use FiapAdmin\Repositories\AdminRepository;
+use FiapAdmin\Repositories\TokenRepository;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use RuntimeException;
@@ -10,11 +11,13 @@ use RuntimeException;
 readonly class Admin
 {
     private AdminRepository $adminRepository;
+    private TokenRepository $tokenRepository;
     private string $secretKey;
 
     public function __construct()
     {
         $this->adminRepository = new AdminRepository();
+        $this->tokenRepository = new TokenRepository();
         $this->secretKey = $this->config()->secretKey;
     }
 
@@ -27,35 +30,47 @@ readonly class Admin
     {
         $admin = $this->adminRepository->findAdminByEmail($email);
 
-        if ($admin && password_verify($password, $admin['password'])) {
-            return $admin;
+        if (!$admin || !$this->isPasswordValid($admin, $password)) {
+            return null;
         }
 
-        return null;
+        return $admin;
     }
 
-    public function validateToken(string $token): array
+    private function isPasswordValid(array $admin, string $password): bool
     {
-        if (empty($token)) {
-            throw new RuntimeException('Token JWT obrigatório', 401);
+        return password_verify($password, $admin['password']);
+    }
+
+    public function isTokenValid(string $bearerToken, string $requiredRole = 'admin'): ?array
+    {
+        $token = str_replace('Bearer ', '', $bearerToken);
+
+        $tokenData = $this->tokenRepository->findByToken($token);
+
+        if (!$tokenData) {
+            return null;
         }
 
-        $token = str_replace('Bearer ', '', $token);
-
-        $decoded = JWT::decode(
-            $token,
-            new Key($this->secretKey, 'HS256')
-        );
-
-        if ($decoded->exp < time()) {
-            throw new RuntimeException('Token expirado', 401);
+        if ($tokenData['revoked']) {
+            return null;
         }
 
-        if ($decoded->role !== 'admin') {
-            throw new RuntimeException('Acesso restrito', 403);
+        if (strtotime($tokenData['expires_at']) < time()) {
+            return null;
         }
 
-        return (array) $decoded;
+        try {
+            $payload = (array) JWT::decode($token, new Key($this->getSecretKey(), 'HS256'));
+
+            if (($payload['role'] ?? '') !== $requiredRole) {
+                return null;
+            }
+
+            return $payload;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     private function config(): object

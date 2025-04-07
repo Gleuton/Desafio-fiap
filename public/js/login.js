@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        login();
+        loginError.textContent = ''; // limpa mensagem anterior
+        await login(loginError);
     });
-})
+});
 
-async function login() {
+async function login(loginError) {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -22,9 +25,11 @@ async function login() {
             localStorage.setItem('token', data.token);
             window.location.href = '/';
         } else {
-            alert('Credenciais inválidas');
+            const errorData = await response.json();
+            loginError.textContent = errorData.error || 'Erro ao fazer login.';
         }
     } catch (error) {
         console.error('Erro:', error);
+        loginError.textContent = 'Erro de conexão com o servidor.';
     }
 }

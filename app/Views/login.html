@@ -38,9 +38,7 @@
                         <button type="submit" class="btn btn-primary w-100">Entrar</button>
                     </form>
                 </div>
-                <div class="card-footer text-center text-danger">
-                    <?= isset($_GET['error']) ? 'E-mail ou senha inválidos' : '' ?>
-                </div>
+                <div id="loginError" class="card-footer text-center text-danger"></div>
             </div>
         </div>
     </div>

@@ -79,3 +79,7 @@ $router->add('get', '/api/auth/check', function (ServerRequestInterface $request
     return new AuthController()->check($request);
 });
 
+$router->add('post', '/api/logout', function (ServerRequestInterface $request) {
+    return new AuthController()->logout($request);
+});
+

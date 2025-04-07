@@ -97,14 +97,6 @@ class Builder
         return $this->execute($sql, [':id' => $id]);
     }
 
-    public function searchBy(string $sqlFragment, array $params): array
-    {
-        $sql = "SELECT * FROM $this->table $sqlFragment";
-
-        $results = $this->query($sql, $params);
-        return $results ?: [];
-    }
-
     private function fillableData(array $data): array
     {
         return array_filter(
@@ -116,7 +108,7 @@ class Builder
         );
     }
 
-    private function execute(string $sql, array $params = []): bool
+    public function execute(string $sql, array $params = []): bool
     {
         return $this->connection->prepare($sql)->execute($params);
     }

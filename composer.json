@@ -32,5 +32,10 @@
     "require-dev": {
         "roave/security-advisories": "dev-latest",
         "phpunit/phpunit": "^12.1"
+    },
+    "scripts": {
+        "db:reset": [
+            "@php scripts/reset-db.php"
+        ]
     }
 }
