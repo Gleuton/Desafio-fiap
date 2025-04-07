@@ -7,6 +7,7 @@ use Firebase\JWT\JWT;
 use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface as Response;
 
 class AuthController
 {
@@ -17,19 +18,21 @@ class AuthController
         $this->admin = new Admin();
     }
 
-    private function config(): object
+    public function check(ServerRequestInterface $request): Response
     {
-        $file = file_get_contents(__DIR__ . '/../../env.json');
+        $headers = $request->getHeaders();
+        $token = $headers['authorization'][0] ?? '';
+        $this->admin->validateToken($token);
 
-        return json_decode($file, false, 512, JSON_THROW_ON_ERROR);
+        return new JsonResponse(['valid' => true], 200);
     }
 
     /**
      * @throws JsonException
      */
-    public function login(ServerRequestInterface $request): JsonResponse
+    public function login(ServerRequestInterface $request): Response
     {
-        $secretKey = $this->config()->secretKey;
+        $secretKey = $this->admin->getSecretKey();
 
         $body = $request->getBody();
         $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);

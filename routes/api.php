@@ -71,7 +71,11 @@ $router->add('GET', '/api/courses/(\d+)/enrollments', function (ServerRequestInt
     return new EnrollmentsController()->listByCurses($courseId);
 }, [AuthMiddleware::class]);
 
-$router->add('post', '/api/login', function (ServerRequestInterface $request, array $params) {
+$router->add('post', '/api/login', function (ServerRequestInterface $request) {
     return new AuthController()->login($request);
+});
+
+$router->add('get', '/api/auth/check', function (ServerRequestInterface $request) {
+    return new AuthController()->check($request);
 });
 
