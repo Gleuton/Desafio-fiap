@@ -34,8 +34,9 @@
         "phpunit/phpunit": "^12.1"
     },
     "scripts": {
-        "db:reset": [
+        "db:install": [
             "@php scripts/reset-db.php"
-        ]
+        ],
+        "test": "vendor/bin/phpunit tests"
     }
 }
