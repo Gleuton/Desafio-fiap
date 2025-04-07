@@ -1,11 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+    }
+
     const enrollmentModal = document.getElementById('enrollmentModal');
     configureEnrollmentModal(enrollmentModal);
 });
 
+function getToken() {
+    return localStorage.getItem('token');
+}
+
 async function fetchEnrollmentForm() {
     try {
-        const response = await fetch('/enrollments/form');
+        const response = await fetch('/enrollments/form', {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`
+            }
+        });
         return await response.text();
     } catch (error) {
         console.error('Erro ao carregar formulário:', error);
@@ -21,8 +34,14 @@ async function initializeAutocomplete() {
 
     input.addEventListener('input', async (e) => {
         const searchTerm = e.target.value.trim();
+        if (!searchTerm) return;
+
         try {
-            const response = await fetch(`/api/students?name=${searchTerm}&limit=10`);
+            const response = await fetch(`/api/students?name=${encodeURIComponent(searchTerm)}&limit=10`, {
+                headers: {
+                    'Authorization': `Bearer ${getToken()}`
+                }
+            });
             const students = await response.json();
 
             list.innerHTML = '';
@@ -48,8 +67,8 @@ function selectStudent(event) {
 }
 
 async function submitEnrollment() {
-    const courseId = document.getElementById('courseId').value;
-    const studentId = document.getElementById('studentId').value;
+    const courseId = document.getElementById('courseId')?.value;
+    const studentId = document.getElementById('studentId')?.value;
     const messageBox = document.getElementById('formMessages');
 
     if (messageBox) {
@@ -70,7 +89,10 @@ async function submitEnrollment() {
     try {
         const response = await fetch('/api/enrollments', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
             body: JSON.stringify({ course_id: courseId, user_id: studentId })
         });
 
@@ -84,15 +106,13 @@ async function submitEnrollment() {
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('enrollmentModal'));
                 modal.hide();
-                loadCourses();
+                loadCourses(); // função global
             }, 250);
         } else {
             const errorData = await response.json();
-
             if (messageBox) {
                 messageBox.classList.remove('d-none');
                 messageBox.classList.add('alert', 'alert-danger');
-
                 const messages = Object.values(errorData).join(' ');
                 messageBox.textContent = messages || 'Erro ao realizar matrícula.';
             }
@@ -106,7 +126,6 @@ async function submitEnrollment() {
         }
     }
 }
-
 
 function configureEnrollmentModal(modalElement) {
     modalElement.addEventListener('show.bs.modal', async (event) => {

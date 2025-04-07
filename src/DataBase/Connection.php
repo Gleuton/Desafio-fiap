@@ -12,7 +12,7 @@ class Connection
     {
     }
 
-    private static function config()
+    private static function config(): object
     {
         $file = file_get_contents(__DIR__ . '/../../env.json');
 
@@ -26,7 +26,7 @@ class Connection
         $conn .= "dbname=" . self::config()->dbname . ";";
 
         if (is_null(self::$instance)) {
-            return new PDO(
+            self::$instance = new PDO(
                 $conn,
                 self::config()->user,
                 self::config()->password,
@@ -36,7 +36,8 @@ class Connection
         return self::$instance;
     }
 
-    public static function reset():void{
+    public static function reset(): void
+    {
         self::$instance = null;
     }
 }

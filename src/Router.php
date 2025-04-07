@@ -50,7 +50,34 @@ class Router implements RequestHandlerInterface
 
             unset($params[0]);
 
-            $handler = $this;
+            $finalHandler = new class($data['callback'], $params) implements RequestHandlerInterface {
+                private $callback;
+                private array $params;
+
+                public function __construct(callable $callback, array $params)
+                {
+                    $this->callback = $callback;
+                    $this->params = $params;
+                }
+
+                public function handle(ServerRequestInterface $request): ResponseInterface
+                {
+                    $result = call_user_func($this->callback, $request, $this->params);
+
+                    if ($result instanceof ResponseInterface) {
+                        return $result;
+                    }
+
+                    if (is_string($result)) {
+                        return new HtmlResponse($result);
+                    }
+
+                    return new JsonResponse($result);
+                }
+            };
+
+
+            $handler = $finalHandler;
             foreach (array_reverse($data['middlewares']) as $middlewareClass) {
                 if (!class_exists($middlewareClass)) {
                     throw new Exception("Middleware {$middlewareClass} não encontrado");
@@ -62,27 +89,29 @@ class Router implements RequestHandlerInterface
                     throw new Exception("Middleware {$middlewareClass} não implementa MiddlewareInterface");
                 }
 
-                $handler = static function (ServerRequestInterface $request) use ($middleware, $handler) {
-                    return $middleware->process($request, $handler);
+                $handler = new class($middleware, $handler) implements RequestHandlerInterface {
+                    private MiddlewareInterface $middleware;
+                    private RequestHandlerInterface $nextHandler;
+
+                    public function __construct(MiddlewareInterface $middleware, RequestHandlerInterface $nextHandler)
+                    {
+                        $this->middleware = $middleware;
+                        $this->nextHandler = $nextHandler;
+                    }
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface
+                    {
+                        return $this->middleware->process($request, $this->nextHandler);
+                    }
                 };
             }
 
-            $callback = $data['callback'];
-            $result = $callback($request, $params);
-
-            if ($result instanceof ResponseInterface) {
-                return $result;
-            }
-
-            if (is_string($result)) {
-                return new HtmlResponse($result);
-            }
-
-            return new JsonResponse($result);
+            return $handler->handle($request);
         }
 
         throw new HttpException('Page not found', 404);
     }
+
 
     public function getRoutes(): array
     {

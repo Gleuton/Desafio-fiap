@@ -69,6 +69,6 @@ VALUES (1,
         '1990-01-01',
         '000.000.000-00',
         'admin@fiap.com',
-        '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+        '$2y$12$XL4ePWi6PbwCPz/LZFCy4OQ5sgxwWGvTgOWKa7m5G6095AmgBThe.');
 
 SET FOREIGN_KEY_CHECKS = 1;

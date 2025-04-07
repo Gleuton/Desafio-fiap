@@ -1,7 +1,6 @@
 <?php
 
 use Core\View;
-use FiapAdmin\Middlewares\AuthMiddleware;
 
 /**
  * @var $router
@@ -13,7 +12,6 @@ $router->add(
     function () {
         return View::render('main');
     },
-    [AuthMiddleware::class]
 );
 
 $router->add(
@@ -21,8 +19,7 @@ $router->add(
     '/students',
     function () {
         return View::render('students/list');
-    },
-    [AuthMiddleware::class]
+    }
 );
 
 $router->add(
@@ -30,8 +27,7 @@ $router->add(
     '/students/form',
     function () {
         return View::render('students/form');
-    },
-    [AuthMiddleware::class]
+    }
 );
 
 $router->add(
@@ -39,8 +35,7 @@ $router->add(
     '/courses',
     function () {
         return View::render('courses/list');
-    },
-    [AuthMiddleware::class]
+    }
 );
 
 $router->add(
@@ -48,8 +43,7 @@ $router->add(
     '/courses/form',
     function () {
         return View::render('courses/form');
-    },
-    [AuthMiddleware::class]
+    }
 );
 
 $router->add(
@@ -57,8 +51,7 @@ $router->add(
     '/enrollments',
     function () {
         return View::render('courses/enrollments');
-    },
-    [AuthMiddleware::class]
+    }
 );
 
 $router->add(
@@ -66,8 +59,7 @@ $router->add(
     '/enrollments/form',
     function () {
         return View::render('courses/enrollment');
-    },
-    [AuthMiddleware::class]
+    }
 );
 
 $router->add('get', '/login', function () {

@@ -95,7 +95,7 @@ class StudentRepository extends Repository
         return $this->conn->query($sql, $params)[0]['total'] > 0;
     }
 
-    public function findAllByName(string $name, int $limit): ?array
+    public function findAllByName(string $name, ?int $limit): ?array
     {
         $nameSearch = '%' . trim($name) . '%';
         $nameSearch = filter_var($nameSearch);

@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     configureModal();
 });
 
+function getToken() {
+    return localStorage.getItem('token');
+}
+
 function loadStudents(searchTerm = "") {
     const tableBody = document.getElementById('alunosTable');
     tableBody.innerHTML = `
@@ -15,7 +19,12 @@ function loadStudents(searchTerm = "") {
 
     const url = `/api/students${searchTerm ? `?name=${searchTerm}` : ""}`;
 
-    fetch(url)
+    fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json'
+        }
+    })
         .then(response => response.json())
         .then(students => renderStudents(students, tableBody))
         .catch(error => handleError(error, tableBody));
@@ -26,8 +35,10 @@ function renderStudents(students, tableBody) {
         const [year, month, day] = date.split('-');
         return `${day}/${month}/${year}`;
     };
-    tableBody.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">Nenhum aluno encontrada.</td></tr>";
-    if (students.length >= 1 ){
+
+    tableBody.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">Nenhum aluno encontrado.</td></tr>";
+
+    if (students.length >= 1) {
         tableBody.innerHTML = students.map(student => `
         <tr>
             <td>${student.id}</td>
@@ -59,7 +70,6 @@ function renderStudents(students, tableBody) {
         </tr>
     `).join('');
     }
-
 }
 
 function handleError(error, tableBody) {
@@ -99,7 +109,6 @@ function configureModal() {
     });
 }
 
-
 async function fetchForm() {
     const response = await fetch('/students/form');
     return response.text();
@@ -118,7 +127,12 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchStudent(id) {
-    const response = await fetch(`/api/students/${id}`);
+    const response = await fetch(`/api/students/${id}`, {
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json'
+        }
+    });
     return response.json();
 }
 
@@ -149,14 +163,17 @@ async function handleSubmit(e) {
     try {
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
             body: JSON.stringify(Object.fromEntries(formData))
         });
 
         if (response.ok) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('studentModal'));
             modal.hide();
-            loadStudents(document.getElementById('alunosTable'));
+            loadStudents();
         } else {
             const errors = await response.json();
             displayErrors(errors, form);
@@ -170,10 +187,16 @@ async function deleteStudent(id) {
     if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
 
     try {
-        const response = await fetch(`/api/students/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/students/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
         if (response.ok) {
-            loadStudents(document.getElementById('alunosTable'));
+            loadStudents();
         } else {
             const error = await response.json();
             alert(`Erro: ${error.message}`);
@@ -186,7 +209,5 @@ async function deleteStudent(id) {
 
 function handleSearch() {
     const searchTerm = document.getElementById("searchInput").value.trim();
-    const tableBody = document.getElementById("alunosTable");
-
-    loadStudents(tableBody, searchTerm);
+    loadStudents(searchTerm);
 }

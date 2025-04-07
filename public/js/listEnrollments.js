@@ -8,16 +8,18 @@ studentListModal.addEventListener('show.bs.modal', function (event) {
 async function deleteEnrollment(enrollmentId, courseId) {
     if (!confirm('Tem certeza que deseja remover esta matrícula?')) return;
 
+    const token = localStorage.getItem('token');
+
     try {
         const response = await fetch(`/api/enrollments/${enrollmentId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (response.ok) {
-            // Recarrega apenas a lista de alunos sem fechar a modal
             await loadStudentList(courseId);
-
-            // Atualiza a lista principal de cursos (contadores)
             if (typeof loadCourses === 'function') {
                 loadCourses();
             }
@@ -35,9 +37,24 @@ async function loadStudentList(courseId) {
     const list = document.getElementById('studentListContent');
     list.innerHTML = '<li class="list-group-item">Carregando...</li>';
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+        list.innerHTML = '<li class="list-group-item text-danger">Token não encontrado.</li>';
+        return;
+    }
+
     try {
-        const response = await fetch(`/api/courses/${courseId}/enrollments`);
+        const response = await fetch(`/api/courses/${courseId}/enrollments`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
         const enrollments = await response.json();
+
+        if (!response.ok) {
+            throw new Error(enrollments.message || 'Erro ao buscar matrículas');
+        }
 
         if (enrollments.length === 0) {
             list.innerHTML = '<li class="list-group-item">Nenhum aluno matriculado.</li>';
