@@ -223,17 +223,46 @@ async function handleSubmit(e) {
     }
 }
 
-function deleteCourse(id) {
+async function deleteCourse(id) {
     const token = localStorage.getItem('token');
-    if (confirm("Tem certeza que deseja excluir esta turma?")) {
-        fetch(`/api/courses/${id}`, {
+
+    if (!confirm("Tem certeza que deseja excluir esta turma?")) return;
+
+    try {
+        const response = await fetch(`/api/courses/${id}`, {
             method: "DELETE",
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
-        })
-            .then(() => loadCourses())
-            .catch(error => console.error(error));
+        });
+
+        if (response.ok) {
+            loadCourses();
+        } else {
+            let errorMessage = 'Erro ao excluir turma.';
+
+            if (response.status === 401) {
+                errorMessage = 'Não autorizado. Faça login novamente.';
+            } else if (response.status === 403) {
+                errorMessage = 'Você não tem permissão para excluir esta turma.';
+            } else {
+                try {
+                    const errorData = await response.json();
+
+                    const firstErrorKey = Object.keys(errorData)[0];
+                    if (firstErrorKey) {
+                        errorMessage = errorData[firstErrorKey];
+                    }
+                } catch (_) {
+                }
+            }
+
+            alert(errorMessage);
+        }
+    } catch (error) {
+        console.error('Erro inesperado:', error);
+        alert('Erro inesperado. Verifique sua conexão e tente novamente.');
     }
 }
+
