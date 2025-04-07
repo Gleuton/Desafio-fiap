@@ -40,4 +40,9 @@ readonly class Enrollments
             'id' => $id
         ];
     }
+
+    public function listByCurses(int $courseId)
+    {
+        return $this->repository->listByCurses($courseId);
+    }
 }

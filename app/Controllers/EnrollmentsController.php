@@ -32,4 +32,9 @@ class EnrollmentsController
 
         return new JsonResponse($result, 201);
     }
+
+    public function listByCurses(int $courseId): JsonResponse
+    {
+        return new JsonResponse($this->enrollments->listByCurses($courseId));
+    }
 }

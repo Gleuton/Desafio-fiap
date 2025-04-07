@@ -59,3 +59,8 @@ $router->add('POST', '/api/enrollments', function (ServerRequestInterface $reque
     return new EnrollmentsController()->create($request);
 });
 
+$router->add('GET', '/api/courses/(\d+)/enrollments', function (ServerRequestInterface $request, array $params) {
+    $courseId = (int)$params[1];
+    return new EnrollmentsController()->listByCurses($courseId);
+});
+

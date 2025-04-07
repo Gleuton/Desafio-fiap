@@ -75,7 +75,7 @@ function renderCourses(data, page, tableBody) {
                                     data-course-id="${course.id}"
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
-                                    title="Lista de Alunos">
+                                    title="Lista de Alunos Matrículados">
                                     <i class="bi bi-people"></i>
                                 </button>
                                 <button 

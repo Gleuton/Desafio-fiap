@@ -88,7 +88,7 @@ class StudentRepository extends Repository
     {
         $sql = "SELECT COUNT(*) total
             FROM $this->table u
-            INNER JOIN enrollments e ON u.id =e.user_id
+            INNER JOIN enrollments e ON u.id = e.user_id
             WHERE u.id = ?";
 
         $params = [$id];
