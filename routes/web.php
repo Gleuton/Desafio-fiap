@@ -24,6 +24,7 @@ $router->add(
     },
     [AuthMiddleware::class]
 );
+
 $router->add(
     'get',
     '/students/form',
