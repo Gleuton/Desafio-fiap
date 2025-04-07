@@ -15,18 +15,39 @@ class ViewTest extends TestCase
     {
         parent::setUp();
         $this->tempDir = sys_get_temp_dir() . '/view-tests';
-        mkdir($this->tempDir, 0777, true);
+        if (!is_dir($this->tempDir)) {
+            mkdir($this->tempDir, 0777, true);
+        }
 
-        // Configura um diretório temporário como caminho padrão
+        // Configura um diretório temporário como caminho padrão para views
         $this->defaultPath = $this->tempDir . '/app/Views/';
-        mkdir($this->defaultPath, 0777, true);
+        if (!is_dir($this->defaultPath)) {
+            mkdir($this->defaultPath, 0777, true);
+        }
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        array_map('unlink', glob($this->tempDir . '/*'));
-        rmdir($this->tempDir);
+        $this->rrmdir($this->tempDir);
+    }
+
+    private function rrmdir(string $dir): void
+    {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object !== "." && $object !== "..") {
+                    $path = $dir . "/" . $object;
+                    if (is_dir($path)) {
+                        $this->rrmdir($path);
+                    } else {
+                        unlink($path);
+                    }
+                }
+            }
+            rmdir($dir);
+        }
     }
 
     public function testRenderExistingFile(): void
@@ -51,7 +72,5 @@ class ViewTest extends TestCase
 
         $content = View::render('home', $this->defaultPath);
         $this->assertEquals('Conteúdo da página inicial', $content);
-
-        unlink($filePath);
     }
 }
