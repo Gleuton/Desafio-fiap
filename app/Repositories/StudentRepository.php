@@ -95,10 +95,26 @@ class StudentRepository extends Repository
         return $this->conn->query($sql, $params)[0]['total'] > 0;
     }
 
-    public function findAllByName(string $name): ?array
+    public function findAllByName(string $name, int $limit): ?array
     {
         $nameSearch = '%' . trim($name) . '%';
         $nameSearch = filter_var($nameSearch);
-        return $this->searchBy('WHERE name like :name', ['name' => $nameSearch]);
+        $params = ['name' => $nameSearch];
+        $sql = "SELECT 
+                    u.id, 
+                    u.name, 
+                    u.birthdate, 
+                    u.cpf, 
+                    u.email 
+                FROM $this->table u
+                INNER JOIN roles r ON u.role_id = r.id 
+                    WHERE u.name like :name 
+                    AND r.name = 'student'";
+
+        if ($limit) {
+            $sql .= ' LIMIT ' . $limit;
+        }
+
+        return $this->conn->query($sql, $params);
     }
 }

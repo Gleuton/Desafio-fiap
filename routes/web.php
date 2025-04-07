@@ -51,6 +51,24 @@ $router->add(
     [AuthMiddleware::class]
 );
 
+$router->add(
+    'get',
+    '/enrollments',
+    function () {
+        return View::render('courses/enrollments');
+    },
+    [AuthMiddleware::class]
+);
+
+$router->add(
+    'get',
+    '/enrollments/form',
+    function () {
+        return View::render('courses/enrollment');
+    },
+    [AuthMiddleware::class]
+);
+
 $router->add('get', '/login', function () {
     return View::render('login');
 });

@@ -60,14 +60,41 @@ function renderCourses(data, page, tableBody) {
                                 <button 
                                     class="btn btn-sm btn-success" 
                                     data-bs-toggle="modal"
+                                    data-bs-target="#enrollmentModal"
+                                    data-action="enroll"
+                                    data-course-id="${course.id}"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Matricular Alunos">
+                                    <i class="bi bi-person-plus-fill"></i>
+                                </button>                                
+                                <button 
+                                    class="btn btn-sm btn-info" 
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#studentListModal"
+                                    data-course-id="${course.id}"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Lista de Alunos">
+                                    <i class="bi bi-people"></i>
+                                </button>
+                                <button 
+                                    class="btn btn-sm btn-success" 
+                                    data-bs-toggle="modal"
                                     data-bs-target="#courseModal"
                                     data-action="edit"
                                     data-id="${course.id}"
-                                    onclick="prepareModal(${course.id})">
+                                    onclick="prepareModal(${course.id})"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Editar Turma">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger" 
-                                        onclick="deleteCourse(${course.id})">
+                                        onclick="deleteCourse(${course.id})"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Exluir Turma">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>

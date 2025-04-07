@@ -42,11 +42,17 @@ function renderStudents(students, tableBody) {
                     data-bs-target="#studentModal"
                     data-action="edit"
                     data-id="${student.id}"
-                >
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Editar Aluno">
                     <i class="bi bi-pencil-square"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" 
-                        onclick="deleteStudent(${student.id})">
+                <button 
+                    class="btn btn-sm btn-danger" 
+                    onclick="deleteStudent(${student.id})"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Excluir Aluno">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>

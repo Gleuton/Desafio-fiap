@@ -20,7 +20,8 @@ class StudentController
     public function index(Request $request): Response
     {
         $studentName = $request->getQueryParams()['name'] ?? null;
-        return new JsonResponse($this->student->all($studentName));
+        $limit = $request->getQueryParams()['limit'] ?? null;
+        return new JsonResponse($this->student->all($studentName, $limit));
     }
 
     /**
