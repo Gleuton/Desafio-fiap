@@ -59,6 +59,11 @@ $router->add('POST', '/api/enrollments', function (ServerRequestInterface $reque
     return new EnrollmentsController()->create($request);
 });
 
+$router->add('DELETE', '/api/enrollments/(\d+)', function(ServerRequestInterface $request, array $params) {
+    $id = (int)$params[1];
+    return new EnrollmentsController()->delete($id);
+});
+
 $router->add('GET', '/api/courses/(\d+)/enrollments', function (ServerRequestInterface $request, array $params) {
     $courseId = (int)$params[1];
     return new EnrollmentsController()->listByCurses($courseId);

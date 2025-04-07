@@ -1,9 +1,38 @@
 const studentListModal = document.getElementById('studentListModal');
-studentListModal.addEventListener('show.bs.modal', async function (event) {
+studentListModal.addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;
     const courseId = button.getAttribute('data-course-id');
-    const list = document.getElementById('studentListContent');
+    loadStudentList(courseId);
+});
 
+async function deleteEnrollment(enrollmentId, courseId) {
+    if (!confirm('Tem certeza que deseja remover esta matrícula?')) return;
+
+    try {
+        const response = await fetch(`/api/enrollments/${enrollmentId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            // Recarrega apenas a lista de alunos sem fechar a modal
+            await loadStudentList(courseId);
+
+            // Atualiza a lista principal de cursos (contadores)
+            if (typeof loadCourses === 'function') {
+                loadCourses();
+            }
+        } else {
+            const errorText = await response.text();
+            alert(`Erro: ${errorText}`);
+        }
+    } catch (error) {
+        console.error('Erro ao excluir matrícula:', error);
+        alert('Erro ao excluir matrícula.');
+    }
+}
+
+async function loadStudentList(courseId) {
+    const list = document.getElementById('studentListContent');
     list.innerHTML = '<li class="list-group-item">Carregando...</li>';
 
     try {
@@ -29,29 +58,5 @@ studentListModal.addEventListener('show.bs.modal', async function (event) {
     } catch (error) {
         console.error('Erro ao carregar alunos:', error);
         list.innerHTML = '<li class="list-group-item text-danger">Erro ao carregar alunos.</li>';
-    }
-});
-
-async function deleteEnrollment(enrollmentId, courseId) {
-    if (!confirm('Tem certeza que deseja remover esta matrícula?')) return;
-
-    try {
-        const response = await fetch(`/api/enrollments/${enrollmentId}`, {
-            method: 'DELETE'
-        });
-
-        if (response.ok) {
-            // Recarrega a lista de alunos do curso
-            const modal = bootstrap.Modal.getInstance(document.getElementById('studentListModal'));
-            modal.hide();
-            const reopen = new bootstrap.Modal(document.getElementById('studentListModal'));
-            reopen.show(); // Reabre para atualizar (pode ser refinado com reload direto se preferir)
-        } else {
-            const errorText = await response.text();
-            alert(`Erro: ${errorText}`);
-        }
-    } catch (error) {
-        console.error('Erro ao excluir matrícula:', error);
-        alert('Erro ao excluir matrícula.');
     }
 }

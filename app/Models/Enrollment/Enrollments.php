@@ -28,20 +28,12 @@ readonly class Enrollments
         ];
     }
 
-    public function delete(int $id): array {
-        $errors = [];
-
-        if (!empty($errors)) {
-            return ['success' => false, 'errors' => $errors];
-        }
-
-        return [
-            'success' => $this->repository->delete($id),
-            'id' => $id
-        ];
+    public function delete(int $id): void
+    {
+        $this->repository->delete($id);
     }
 
-    public function listByCurses(int $courseId)
+    public function listByCurses(int $courseId): array
     {
         return $this->repository->listByCurses($courseId);
     }

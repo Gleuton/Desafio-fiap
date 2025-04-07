@@ -37,4 +37,10 @@ class EnrollmentsController
     {
         return new JsonResponse($this->enrollments->listByCurses($courseId));
     }
+
+    public function delete(int $id): JsonResponse
+    {
+        $this->enrollments->delete($id);
+        return new JsonResponse([], 201);
+    }
 }
