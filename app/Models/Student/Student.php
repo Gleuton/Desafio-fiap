@@ -34,6 +34,7 @@ readonly class Student
     public function create(array $data): array
     {
         $validation = $this->validator->validateCreate($data);
+
         if (!empty($validation)) {
             return ['success' => false, 'errors' => $validation];
         }

@@ -3,7 +3,8 @@
 namespace Tests\Unit\Core;
 
 use Core\Exceptions\HttpException;
-use Core\Router;
+use Core\Router\Route;
+use Core\Router\Router;
 use Exception;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -44,8 +45,11 @@ class RouterTest extends TestCase
         $this->router->add('GET', '/test', $callback);
 
         $routes = $this->router->getRoutes();
+
         $this->assertArrayHasKey('get', $routes);
-        $this->assertArrayHasKey('/^\/test$/', $routes['get']);
+        $this->assertNotEmpty($routes['get']);
+        $this->assertInstanceOf(Route::class, $routes['get'][0]);
+        $this->assertEquals('/^\/test$/', $routes['get'][0]->getPattern());
     }
 
     public function testHandleValidRouteWithCallback(): void

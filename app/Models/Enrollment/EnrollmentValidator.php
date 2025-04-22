@@ -20,6 +20,7 @@ class EnrollmentValidator
         if (empty($data['user_id'])) {
             $errors['user_id'] = 'O ID do aluno é obrigatório';
         }
+
         if (empty($data['course_id'])) {
             $errors['course_id'] = 'O ID da turma é obrigatório';
         }

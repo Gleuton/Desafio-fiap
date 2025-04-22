@@ -1,5 +1,5 @@
 <?php
-use Core\Router;
+use Core\Router\Router;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;

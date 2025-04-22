@@ -5,7 +5,6 @@ namespace FiapAdmin\Controllers;
 use FiapAdmin\Models\Admin\Admin;
 use FiapAdmin\Repositories\TokenRepository;
 use Firebase\JWT\JWT;
-use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface as Response;
