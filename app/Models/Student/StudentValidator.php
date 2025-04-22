@@ -106,7 +106,7 @@ class StudentValidator
             $sum += (int)$cpf[$i] * $weight--;
         }
         $checkDigit = ($sum % 11) < 2 ? 0 : 11 - ($sum % 11);
-        if ($checkDigit !== $cpf[9]) {
+        if ($checkDigit != $cpf[9]) {
             return false;
         }
 
@@ -114,7 +114,7 @@ class StudentValidator
             $sum += (int)$cpf[$i] * $weight--;
         }
         $checkDigit = ($sum % 11) < 2 ? 0 : 11 - ($sum % 11);
-        return $checkDigit === $cpf[10];
+        return $checkDigit == $cpf[10];
     }
 
     private function validatePassword(string $password): bool
