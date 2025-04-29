@@ -71,15 +71,15 @@ $router->add('GET', '/api/courses/(\d+)/enrollments', function (ServerRequestInt
     return new EnrollmentsController()->listByCurses($courseId);
 }, [AuthMiddleware::class]);
 
-$router->add('post', '/api/login', function (ServerRequestInterface $request) {
+$router->add('POST', '/api/login', function (ServerRequestInterface $request) {
     return new AuthController()->login($request);
 });
 
-$router->add('get', '/api/auth/check', function (ServerRequestInterface $request) {
+$router->add('GET', '/api/auth/check', function (ServerRequestInterface $request) {
     return new AuthController()->check($request);
 });
 
-$router->add('post', '/api/logout', function (ServerRequestInterface $request) {
+$router->add('POST', '/api/logout', function (ServerRequestInterface $request) {
     return new AuthController()->logout($request);
 });
 

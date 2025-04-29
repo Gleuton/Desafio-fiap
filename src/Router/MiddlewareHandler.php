@@ -34,21 +34,7 @@ class MiddlewareHandler implements RequestHandlerInterface
                     throw new Exception("Middleware {$middlewareClass} não implementa MiddlewareInterface");
                 }
 
-                return new class($middleware, $next) implements RequestHandlerInterface {
-                    private MiddlewareInterface $middleware;
-                    private RequestHandlerInterface $nextHandler;
-
-                    public function __construct(MiddlewareInterface $middleware, RequestHandlerInterface $nextHandler)
-                    {
-                        $this->middleware = $middleware;
-                        $this->nextHandler = $nextHandler;
-                    }
-
-                    public function handle(ServerRequestInterface $request): ResponseInterface
-                    {
-                        return $this->middleware->process($request, $this->nextHandler);
-                    }
-                };
+                return new MiddlewareRequestHandler($middleware, $next);
             },
             $this->finalHandler
         );
