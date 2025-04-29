@@ -37,7 +37,7 @@ readonly class StudentController
         return new JsonResponse($result, 201);
     }
 
-    public function show(string $id): Response
+    public function show(Request $request, int $id): Response
     {
         return new JsonResponse($this->student->findById($id));
     }
@@ -58,7 +58,7 @@ readonly class StudentController
         return new JsonResponse($result, 201);
     }
 
-    public function delete(int $id): Response
+    public function delete(Request $request, int $id): Response
     {
         $result = $this->student->delete($id);
         if (!$result['success']) {

@@ -4,13 +4,11 @@ namespace FiapAdmin\Models\Enrollment;
 
 use FiapAdmin\Repositories\EnrollmentRepository;
 
-class EnrollmentValidator
+readonly class EnrollmentValidator
 {
-    private EnrollmentRepository $repository;
 
-    public function __construct()
+    public function __construct(private EnrollmentRepository $repository)
     {
-        $this->repository = new EnrollmentRepository;
     }
 
     public function validateCreate(array $data): array

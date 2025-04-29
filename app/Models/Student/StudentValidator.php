@@ -4,13 +4,10 @@ namespace FiapAdmin\Models\Student;
 
 use FiapAdmin\Repositories\StudentRepository;
 
-class StudentValidator
+readonly class StudentValidator
 {
-    private StudentRepository $student;
-
-    public function __construct()
+    public function __construct(private StudentRepository $student)
     {
-        $this->student = new StudentRepository();
     }
 
     public function validateCreate(array $data): array

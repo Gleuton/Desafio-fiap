@@ -6,13 +6,8 @@ use FiapAdmin\Repositories\CourseRepository;
 
 readonly class Course
 {
-    private CourseRepository $repository;
-    private CourseValidator $validator;
-
-    public function __construct()
+    public function __construct(private CourseRepository $repository, private CourseValidator $validator)
     {
-        $this->repository = new CourseRepository();
-        $this->validator = new CourseValidator();
     }
 
     public function index(int $page, int $limit): array

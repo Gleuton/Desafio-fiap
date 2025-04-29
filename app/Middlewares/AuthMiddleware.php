@@ -3,8 +3,6 @@
 namespace FiapAdmin\Middlewares;
 
 use FiapAdmin\Models\Admin\Admin;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

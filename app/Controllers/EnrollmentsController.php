@@ -31,12 +31,12 @@ readonly class EnrollmentsController
         return new JsonResponse($result, 201);
     }
 
-    public function listByCurses(int $courseId): JsonResponse
+    public function listByCurses(Request $request, int $courseId): JsonResponse
     {
         return new JsonResponse($this->enrollments->listByCurses($courseId));
     }
 
-    public function delete(int $id): JsonResponse
+    public function delete(Request $request, int $id): JsonResponse
     {
         $this->enrollments->delete($id);
         return new JsonResponse([], 201);

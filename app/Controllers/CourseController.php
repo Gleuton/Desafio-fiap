@@ -39,12 +39,12 @@ readonly class CourseController
         return new JsonResponse($result, 201);
     }
 
-    public function show(string $id): Response
+    public function show(Request $request, int $id): Response
     {
         return new JsonResponse($this->course->findById($id));
     }
 
-    public function delete(int $id): JsonResponse
+    public function delete(Request $request, int $id): JsonResponse
     {
         $result = $this->course->delete($id);
         if (!$result['success']) {

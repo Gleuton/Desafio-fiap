@@ -7,15 +7,8 @@ use FiapAdmin\Repositories\StudentRepository;
 
 readonly class Student
 {
-    private StudentRepository $repository;
-    private StudentValidator $validator;
-    private RoleRepository $roleRepository;
-
-    public function __construct()
+    public function __construct(private StudentRepository $repository, private StudentValidator $validator, private RoleRepository $roleRepository)
     {
-        $this->repository = new StudentRepository();
-        $this->validator = new StudentValidator();
-        $this->roleRepository = new RoleRepository();
     }
 
     public function findById(int $id): array
