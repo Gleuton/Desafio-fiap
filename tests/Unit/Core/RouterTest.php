@@ -4,7 +4,7 @@ namespace Tests\Unit\Core;
 
 use Core\Exceptions\HttpException;
 use Core\Router\Route;
-use Core\Router\Router;
+use Core\Router\RouteDispatcher;
 use Exception;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -16,13 +16,13 @@ use stdClass;
 
 class RouterTest extends TestCase
 {
-    private Router $router;
+    private RouteDispatcher $router;
     private ServerRequestInterface $request;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->router = new Router();
+        $this->router = new RouteDispatcher();
 
         $serverParams = [
             'REQUEST_METHOD' => 'GET',

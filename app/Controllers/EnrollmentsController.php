@@ -8,13 +8,11 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class EnrollmentsController
+readonly class EnrollmentsController
 {
-    private Enrollments $enrollments;
 
-    public function __construct()
+    public function __construct(private Enrollments $enrollments)
     {
-        $this->enrollments = new Enrollments();
     }
 
     /**

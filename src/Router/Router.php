@@ -2,51 +2,46 @@
 
 namespace Core\Router;
 
-use Core\Exceptions\HttpException;
+use DI\Container;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
-class Router implements RequestHandlerInterface
+readonly class Router
 {
-    /**
-     * @var Route[][]
-     */
-    private array $routes = [];
-
-    public function add(string $method, string $pattern, callable $callback, array $middlewares = []): void
+    public function __construct(private RouteDispatcher $router, private Container $container)
     {
-        $route = new Route($pattern, $callback, $middlewares);
-        $this->routes[strtolower($method)][] = $route;
     }
 
-    public function run(ServerRequestInterface $request): ResponseInterface
+    public function get(string $uri, array|callable $action, array $middlewares = []): void
     {
-        $method = strtolower($request->getMethod());
-        $uri = $request->getUri()->getPath();
-
-        if (empty($this->routes[$method])) {
-            throw new HttpException('Page not found', 404);
-        }
-
-        foreach ($this->routes[$method] as $route) {
-            $params = [];
-            if ($route->matches($uri, $params)) {
-                $handler = new FinalHandler($route->getCallback(), $params);
-                return new MiddlewareHandler($route->getMiddlewares(), $handler)->handle($request);
-            }
-        }
-
-        throw new HttpException('Page not found', 404);
+        $this->register('GET', $uri, $action, $middlewares);
     }
 
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function post(string $uri, array|callable $action, array $middlewares = []): void
     {
-        return $this->run($request);
+        $this->register('POST', $uri, $action, $middlewares);
     }
 
-    public function getRoutes(): array
+    public function put(string $uri, array|callable $action, array $middlewares = []): void
     {
-        return $this->routes;
+        $this->register('PUT', $uri, $action, $middlewares);
+    }
+
+    public function delete(string $uri, array|callable $action, array $middlewares = []): void
+    {
+        $this->register('DELETE', $uri, $action, $middlewares);
+    }
+
+    private function register(string $method, string $uri, array|callable $action, array $middlewares): void
+    {
+        $callback = is_callable($action)
+            ? $action
+            : fn(ServerRequestInterface $request, array $params) => $this->callAction($action[0], $action[1], $request, $params);
+
+        $this->router->add($method, $uri, $callback, $middlewares);
+    }
+
+    private function callAction(string $class, string $method, ServerRequestInterface $request, array $params): mixed
+    {
+        return $this->container->get($class)->$method($request, ...array_values($params));
     }
 }

@@ -9,13 +9,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class CourseController
+readonly class CourseController
 {
-    private Course $course;
-
-    public function __construct()
+    public function __construct(private Course $course)
     {
-        $this->course = new Course();
     }
 
     public function index(ServerRequestInterface $request): JsonResponse

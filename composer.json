@@ -27,7 +27,8 @@
         "psr/http-server-middleware": "^1.0",
         "laminas/laminas-diactoros": "^3.5",
         "laminas/laminas-httphandlerrunner": "^2.11",
-        "firebase/php-jwt": "^6.11"
+        "firebase/php-jwt": "^6.11",
+        "php-di/php-di": "^7.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
