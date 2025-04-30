@@ -5,7 +5,6 @@ use FiapAdmin\Controllers\CourseController;
 use FiapAdmin\Controllers\EnrollmentsController;
 use FiapAdmin\Controllers\StudentController;
 use FiapAdmin\Middlewares\AuthMiddleware;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @var $router

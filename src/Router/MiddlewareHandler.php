@@ -3,6 +3,7 @@
 namespace Core\Router;
 
 use Exception;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -12,11 +13,13 @@ class MiddlewareHandler implements RequestHandlerInterface
 {
     private array $middlewares;
     private RequestHandlerInterface $finalHandler;
+    private ContainerInterface $container;
 
-    public function __construct(array $middlewares, RequestHandlerInterface $finalHandler)
+    public function __construct(array $middlewares, RequestHandlerInterface $finalHandler, ContainerInterface $container)
     {
         $this->middlewares = $middlewares;
         $this->finalHandler = $finalHandler;
+        $this->container = $container;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -27,8 +30,7 @@ class MiddlewareHandler implements RequestHandlerInterface
                 if (!class_exists($middlewareClass)) {
                     throw new Exception("Middleware {$middlewareClass} não encontrado");
                 }
-
-                $middleware = new $middlewareClass();
+                $middleware = $this->container->get($middlewareClass);
 
                 if (!$middleware instanceof MiddlewareInterface) {
                     throw new Exception("Middleware {$middlewareClass} não implementa MiddlewareInterface");

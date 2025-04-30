@@ -14,7 +14,7 @@ $containerBuilder->addDefinitions(__DIR__ . '/src/config/container.php');
 
 $container = $containerBuilder->build();
 
-$dispatcher = new RouteDispatcher();
+$dispatcher = new RouteDispatcher($container);
 $router = new Router($dispatcher, $container);
 
 require_once __DIR__ . '/routes/web.php';

@@ -3,6 +3,7 @@
 namespace Core\Router;
 
 use Core\Exceptions\HttpException;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -13,6 +14,10 @@ class RouteDispatcher implements RequestHandlerInterface
      * @var Route[][]
      */
     private array $routes = [];
+
+    public function __construct(private ContainerInterface $container)
+    {
+    }
 
     public function add(string $method, string $pattern, callable $callback, array $middlewares = []): void
     {
@@ -33,7 +38,7 @@ class RouteDispatcher implements RequestHandlerInterface
             $params = [];
             if ($route->matches($uri, $params)) {
                 $handler = new FinalHandler($route->getCallback(), $params);
-                return new MiddlewareHandler($route->getMiddlewares(), $handler)->handle($request);
+                return new MiddlewareHandler($route->getMiddlewares(), $handler, $this->container)->handle($request);
             }
         }
 
