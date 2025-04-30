@@ -116,7 +116,10 @@ readonly class StudentValidator
 
     private function validatePassword(string $password): bool
     {
-        return (bool) preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password);
+        return (bool) preg_match(
+            '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&.]{8,}$/u',
+            $password
+        );
     }
 
     private function validateDate(string $date): bool
