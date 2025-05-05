@@ -7,15 +7,11 @@ use FiapAdmin\Repositories\StudentRepository;
 
 readonly class Student
 {
-    private StudentRepository $repository;
-    private StudentValidator $validator;
-    private RoleRepository $roleRepository;
-
-    public function __construct()
-    {
-        $this->repository = new StudentRepository();
-        $this->validator = new StudentValidator();
-        $this->roleRepository = new RoleRepository();
+    public function __construct(
+        private StudentRepository $repository,
+        private StudentValidator $validator,
+        private RoleRepository $roleRepository
+    ) {
     }
 
     public function findById(int $id): array
@@ -34,6 +30,7 @@ readonly class Student
     public function create(array $data): array
     {
         $validation = $this->validator->validateCreate($data);
+
         if (!empty($validation)) {
             return ['success' => false, 'errors' => $validation];
         }
@@ -63,7 +60,8 @@ readonly class Student
         ];
     }
 
-    public function delete(int $id): array {
+    public function delete(int $id): array
+    {
         $errors = [];
 
         if ($this->repository->hasEnrollments($id)) {

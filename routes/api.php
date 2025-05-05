@@ -5,81 +5,29 @@ use FiapAdmin\Controllers\CourseController;
 use FiapAdmin\Controllers\EnrollmentsController;
 use FiapAdmin\Controllers\StudentController;
 use FiapAdmin\Middlewares\AuthMiddleware;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @var $router
+ * @var $container
  */
 
-$router->add('GET', '/api/students/(\d+)', function (ServerRequestInterface $request, array $params) {
-    $id = (int) $params[1];
-    return new StudentController()->show($id);
-}, [AuthMiddleware::class]);
+$router->get('/api/students', [StudentController::class, 'index'], [AuthMiddleware::class]);
+$router->get('/api/students/(\d+)', [StudentController::class, 'show'], [AuthMiddleware::class]);
+$router->post('/api/students', [StudentController::class, 'create'], [AuthMiddleware::class]);
+$router->put('/api/students/(\d+)', [StudentController::class, 'update'], [AuthMiddleware::class]);
+$router->delete('/api/students/(\d+)', [StudentController::class, 'delete'], [AuthMiddleware::class]);
 
-$router->add('GET', '/api/students', function (ServerRequestInterface $request) {
-    return new StudentController()->index($request);
-}, [AuthMiddleware::class]);
+$router->get('/api/courses', [CourseController::class, 'index'], [AuthMiddleware::class]);
+$router->post('/api/courses', [CourseController::class, 'create'], [AuthMiddleware::class]);
+$router->get('/api/courses/(\d+)', [CourseController::class, 'show'], [AuthMiddleware::class]);
+$router->put('/api/courses/(\d+)', [CourseController::class, 'update'], [AuthMiddleware::class]);
+$router->delete('/api/courses/(\d+)', [CourseController::class, 'delete'], [AuthMiddleware::class]);
 
-$router->add('POST', '/api/students', function (ServerRequestInterface $request) {
-    return new StudentController()->create($request);
-}, [AuthMiddleware::class]);
+$router->post('/api/enrollments', [EnrollmentsController::class, 'create'], [AuthMiddleware::class]);
+$router->delete('/api/enrollments/(\d+)', [EnrollmentsController::class, 'delete'], [AuthMiddleware::class]);
+$router->get('/api/courses/(\d+)/enrollments', [EnrollmentsController::class, 'listByCurses'], [AuthMiddleware::class]);
 
-$router->add('PUT', '/api/students/(\d+)', function (ServerRequestInterface $request, array $params) {
-    $id = $params[1] ?? null;
-    return new StudentController()->update($request, $id);
-}, [AuthMiddleware::class]);
-
-$router->add('DELETE', '/api/students/(\d+)', function (ServerRequestInterface $request, array $params) {
-    $id = (int) $params[1];
-    return new StudentController()->delete($id);
-}, [AuthMiddleware::class]);
-
-$router->add('GET', '/api/courses', function (ServerRequestInterface $request) {
-    return new CourseController()->index($request);
-}, [AuthMiddleware::class]);
-
-$router->add('POST', '/api/courses', function (ServerRequestInterface $request) {
-    return new CourseController()->create($request);
-}, [AuthMiddleware::class]);
-
-$router->add('GET', '/api/courses/(\d+)', function (ServerRequestInterface $request, array $params) {
-    $id = (int) $params[1];
-    return new CourseController()->show($id);
-}, [AuthMiddleware::class]);
-
-$router->add('PUT', '/api/courses/(\d+)', function (ServerRequestInterface $request, array $params) {
-    $id = $params[1] ?? null;
-    return new CourseController()->update($request, $id);
-}, [AuthMiddleware::class]);
-
-$router->add('DELETE', '/api/courses/(\d+)', function (ServerRequestInterface $request, array $params) {
-    $id = (int) $params[1];
-    return new CourseController()->delete($id);
-}, [AuthMiddleware::class]);
-
-$router->add('POST', '/api/enrollments', function (ServerRequestInterface $request) {
-    return new EnrollmentsController()->create($request);
-}, [AuthMiddleware::class]);
-
-$router->add('DELETE', '/api/enrollments/(\d+)', function (ServerRequestInterface $request, array $params) {
-    $id = (int) $params[1];
-    return new EnrollmentsController()->delete($id);
-}, [AuthMiddleware::class]);
-
-$router->add('GET', '/api/courses/(\d+)/enrollments', function (ServerRequestInterface $request, array $params) {
-    $courseId = (int) $params[1];
-    return new EnrollmentsController()->listByCurses($courseId);
-}, [AuthMiddleware::class]);
-
-$router->add('post', '/api/login', function (ServerRequestInterface $request) {
-    return new AuthController()->login($request);
-});
-
-$router->add('get', '/api/auth/check', function (ServerRequestInterface $request) {
-    return new AuthController()->check($request);
-});
-
-$router->add('post', '/api/logout', function (ServerRequestInterface $request) {
-    return new AuthController()->logout($request);
-});
+$router->post('/api/login', [AuthController::class, 'login']);
+$router->get('/api/auth/check', [AuthController::class, 'check']);
+$router->post('/api/logout', [AuthController::class, 'logout']);
 

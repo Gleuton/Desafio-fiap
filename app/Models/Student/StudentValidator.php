@@ -4,13 +4,10 @@ namespace FiapAdmin\Models\Student;
 
 use FiapAdmin\Repositories\StudentRepository;
 
-class StudentValidator
+readonly class StudentValidator
 {
-    private StudentRepository $student;
-
-    public function __construct()
+    public function __construct(private StudentRepository $student)
     {
-        $this->student = new StudentRepository();
     }
 
     public function validateCreate(array $data): array
@@ -98,7 +95,7 @@ class StudentValidator
     private function validateCPF(string $cpf): bool
     {
         $cpf = preg_replace('/[^0-9]/', '', $cpf);
-        if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) {
+        if (strlen($cpf) !== 11 || preg_match('/(\d)\1{10}/', $cpf)) {
             return false;
         }
 
@@ -119,7 +116,10 @@ class StudentValidator
 
     private function validatePassword(string $password): bool
     {
-        return (bool) preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password);
+        return (bool) preg_match(
+            '/^(?=.*[\p{Ll}])(?=.*[\p{Lu}])(?=.*\d)(?=.*[@$!%*?&.])[\p{L}\d@$!%*?&.]{8,}$/u',
+            $password
+        );
     }
 
     private function validateDate(string $date): bool

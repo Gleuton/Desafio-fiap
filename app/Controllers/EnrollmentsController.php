@@ -8,13 +8,11 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class EnrollmentsController
+readonly class EnrollmentsController
 {
-    private Enrollments $enrollments;
 
-    public function __construct()
+    public function __construct(private Enrollments $enrollments)
     {
-        $this->enrollments = new Enrollments();
     }
 
     /**
@@ -33,12 +31,12 @@ class EnrollmentsController
         return new JsonResponse($result, 201);
     }
 
-    public function listByCurses(int $courseId): JsonResponse
+    public function listByCurses(Request $request, int $courseId): JsonResponse
     {
         return new JsonResponse($this->enrollments->listByCurses($courseId));
     }
 
-    public function delete(int $id): JsonResponse
+    public function delete(Request $request, int $id): JsonResponse
     {
         $this->enrollments->delete($id);
         return new JsonResponse([], 201);

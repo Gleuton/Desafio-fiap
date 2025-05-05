@@ -3,8 +3,6 @@
 namespace FiapAdmin\Middlewares;
 
 use FiapAdmin\Models\Admin\Admin;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -13,13 +11,17 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 readonly class AuthMiddleware implements MiddlewareInterface
 {
+    public function __construct(private Admin $admin)
+    {
+    }
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $headers = $request->getHeaders();
         $token = $headers['authorization'][0] ?? '';
 
         try {
-            $adminModel = new Admin();
+            $adminModel = $this->admin;
             $decoded = $adminModel->isTokenValid($token);
 
             if (!$decoded) {

@@ -9,13 +9,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class CourseController
+readonly class CourseController
 {
-    private Course $course;
-
-    public function __construct()
+    public function __construct(private Course $course)
     {
-        $this->course = new Course();
     }
 
     public function index(ServerRequestInterface $request): JsonResponse
@@ -42,12 +39,12 @@ class CourseController
         return new JsonResponse($result, 201);
     }
 
-    public function show(string $id): Response
+    public function show(Request $request, int $id): Response
     {
         return new JsonResponse($this->course->findById($id));
     }
 
-    public function delete(int $id): JsonResponse
+    public function delete(Request $request, int $id): JsonResponse
     {
         $result = $this->course->delete($id);
         if (!$result['success']) {

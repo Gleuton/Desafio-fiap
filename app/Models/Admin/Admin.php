@@ -9,14 +9,10 @@ use Firebase\JWT\Key;
 
 readonly class Admin
 {
-    private AdminRepository $adminRepository;
-    private TokenRepository $tokenRepository;
     private string $secretKey;
 
-    public function __construct()
+    public function __construct(private AdminRepository $adminRepository, private TokenRepository $tokenRepository)
     {
-        $this->adminRepository = new AdminRepository();
-        $this->tokenRepository = new TokenRepository();
         $this->secretKey = $this->config()->secretKey;
     }
 

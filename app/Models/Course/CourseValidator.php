@@ -4,13 +4,10 @@ namespace FiapAdmin\Models\Course;
 
 use FiapAdmin\Repositories\CourseRepository;
 
-class CourseValidator
+readonly class CourseValidator
 {
-    private CourseRepository $courseRepository;
-
-    public function __construct()
+    public function __construct(private CourseRepository $courseRepository)
     {
-        $this->courseRepository = new CourseRepository();
     }
 
     public function validateCreate(array $data): array

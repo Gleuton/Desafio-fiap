@@ -5,21 +5,14 @@ namespace FiapAdmin\Controllers;
 use FiapAdmin\Models\Admin\Admin;
 use FiapAdmin\Repositories\TokenRepository;
 use Firebase\JWT\JWT;
-use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class AuthController
+readonly class AuthController
 {
-    private Admin $admin;
-
-    private TokenRepository $tokenRepository;
-
-    public function __construct()
+    public function __construct(private Admin $admin, private TokenRepository $tokenRepository)
     {
-        $this->admin = new Admin();
-        $this->tokenRepository = new TokenRepository();
     }
 
     public function check(ServerRequestInterface $request): Response

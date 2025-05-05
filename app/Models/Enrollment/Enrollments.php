@@ -6,13 +6,8 @@ use FiapAdmin\Repositories\EnrollmentRepository;
 
 readonly class Enrollments
 {
-    private EnrollmentRepository $repository;
-    private EnrollmentValidator $validator;
-
-    public function __construct()
+    public function __construct(private EnrollmentRepository $repository, private EnrollmentValidator $validator)
     {
-        $this->repository = new EnrollmentRepository();
-        $this->validator = new EnrollmentValidator();
     }
 
     public function create(array $data): array
