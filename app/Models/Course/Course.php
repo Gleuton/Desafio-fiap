@@ -32,7 +32,7 @@ readonly class Course
         }
 
         return [
-            'success' => $this->repository->insert($data),
+            'success' => $this->repository->saveCourse($data),
             'data' => $data
         ];
     }
@@ -50,7 +50,7 @@ readonly class Course
         }
 
         return [
-            'success' => $this->repository->update($id, $data),
+            'success' => $this->repository->updateCourse($id, $data),
             'data' => $data
         ];
     }

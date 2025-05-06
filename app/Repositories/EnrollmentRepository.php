@@ -17,13 +17,13 @@ class EnrollmentRepository extends Repository
             'course_id' => $courseId
         ];
 
-        $result = $this->conn->query($sql, $params);
+        $result = $this->query($sql, $params);
         return !empty($result);
     }
 
-    public function insert(array $data): array
+    public function saveEnrollment(array $data): array
     {
-        $newId = $this->conn->insert($data);
+        $newId = $this->insert($data);
         return $this->findById($newId);
     }
 
@@ -40,6 +40,6 @@ class EnrollmentRepository extends Repository
             'course_id' => $courseId
         ];
 
-        return $this->conn->query($sql, $params);
+        return $this->query($sql, $params);
     }
 }

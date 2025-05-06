@@ -22,7 +22,7 @@ class CourseRepository extends Repository
                 ORDER BY c.name 
                 LIMIT $limit OFFSET $offset";
 
-        return $this->conn->query($sql);
+        return $this->query($sql);
     }
 
     public function countTotal(): int
@@ -30,12 +30,12 @@ class CourseRepository extends Repository
         $sql = "SELECT COUNT(*) total
             FROM $this->table";
 
-        return $this->conn->query($sql)[0]['total'];
+        return $this->query($sql)[0]['total'];
     }
 
-    public function insert(array $data): array
+    public function saveCourse(array $data): array
     {
-        $newId = $this->conn->insert($data);
+        $newId = $this->insert($data);
         return $this->findById($newId);
     }
 
@@ -52,17 +52,17 @@ class CourseRepository extends Repository
             $params[] = $excludeId;
         }
 
-        return $this->conn->query($sql, $params)[0]['total'] > 0;
+        return $this->query($sql, $params)[0]['total'] > 0;
     }
 
     public function findOneById(int $id): ?array
     {
-        return $this->conn->findById($id);
+        return $this->findById($id);
     }
 
-    public function update(int $id, array $data): bool
+    public function updateCourse(int $id, array $data): bool
     {
-       return $this->conn->update($id, $data);
+       return $this->update($id, $data);
     }
 
     public function hasEnrollments(int $id): bool
@@ -73,6 +73,6 @@ class CourseRepository extends Repository
             WHERE c.id = ?";
 
         $params = [$id];
-        return $this->conn->query($sql, $params)[0]['total'] > 0;
+        return $this->query($sql, $params)[0]['total'] > 0;
     }
 }

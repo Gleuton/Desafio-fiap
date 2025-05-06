@@ -27,18 +27,18 @@ class StudentRepository extends Repository
             WHERE r.name = 'student'
             ORDER BY u.name ASC";
 
-        return $this->conn->query($sql);
+        return $this->query($sql);
     }
 
-    public function insert(array $data): array
+    public function saveStudent(array $data): array
     {
-        $newId = $this->conn->insert($data);
+        $newId = $this->insert($data);
         return $this->findById($newId);
     }
 
-    public function update(int $id, array $data): array
+    public function updateStudent(int $id, array $data): array
     {
-        $newId = $this->conn->update($id, $data);
+        $newId = $this->update($id, $data);
         return $this->findById($newId);
     }
 
@@ -57,7 +57,7 @@ class StudentRepository extends Repository
             $params[] = $excludeId;
         }
 
-        return $this->conn->query($sql, $params)[0]['total'] > 0;
+        return $this->query($sql, $params)[0]['total'] > 0;
     }
 
     public function emailExists(string $email, ?int $excludeId = null): bool
@@ -75,7 +75,7 @@ class StudentRepository extends Repository
             $params[] = $excludeId;
         }
 
-        return $this->conn->query($sql, $params)[0]['total'] > 0;
+        return $this->query($sql, $params)[0]['total'] > 0;
     }
 
     public function findOneById(int $id): array
@@ -92,7 +92,7 @@ class StudentRepository extends Repository
             WHERE u.id = ?";
 
         $params = [$id];
-        return $this->conn->query($sql, $params)[0]['total'] > 0;
+        return $this->query($sql, $params)[0]['total'] > 0;
     }
 
     public function findAllByName(string $name, ?int $limit): ?array
@@ -115,6 +115,6 @@ class StudentRepository extends Repository
             $sql .= ' LIMIT ' . $limit;
         }
 
-        return $this->conn->query($sql, $params);
+        return $this->query($sql, $params);
     }
 }

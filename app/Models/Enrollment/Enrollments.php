@@ -18,7 +18,7 @@ readonly class Enrollments
         }
 
         return [
-            'success' => $this->repository->insert($data),
+            'success' => $this->repository->saveEnrollment($data),
             'data' => $data
         ];
     }

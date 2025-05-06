@@ -40,7 +40,7 @@ readonly class Student
         $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
 
         return [
-            'success' => $this->repository->insert($data),
+            'success' => $this->repository->saveStudent($data),
             'data' => $data
         ];
     }
@@ -55,7 +55,7 @@ readonly class Student
         $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
 
         return [
-            'success' => $this->repository->update($id, $data),
+            'success' => $this->repository->updateStudent($id, $data),
             'data' => $data
         ];
     }
