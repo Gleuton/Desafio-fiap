@@ -19,14 +19,14 @@ class TokenRepository extends Repository
         $params = ['token' => $token];
         $sql = 'WHERE token = :token LIMIT 1';
 
-        return $this->conn->findBy($sql, $params);
+        return $this->findBy($sql, $params);
     }
 
     public function revokeAllForUser(int $userId): bool
     {
         $sql = 'UPDATE tokens SET revoked = true WHERE user_id = :user_id';
         $params = ['user_id' => $userId];
-        return $this->conn->execute($sql, $params);
+        return $this->execute($sql, $params);
     }
 
     public function create(int $userId, string $token, string $refreshToken, string $expiresAt): ?int
@@ -39,6 +39,6 @@ class TokenRepository extends Repository
             'revoked'       => 0
         ];
 
-        return $this->conn->insert($params);
+        return $this->insert($params);
     }
 }

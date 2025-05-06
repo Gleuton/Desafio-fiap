@@ -19,6 +19,6 @@ class AdminRepository extends Repository
                     WHERE email = :email
                     AND r.name = :role";
 
-        return $this->conn->query($sql, $params)[0] ?? [];
+        return $this->query($sql, $params)[0] ?? [];
     }
 }

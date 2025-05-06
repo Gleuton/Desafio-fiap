@@ -4,53 +4,31 @@ namespace Core\DataBase;
 
 use PDO;
 
-class Builder
+readonly class Builder
 {
-    private string $table;
-    private string $primaryKey = 'id';
-    public array $fillable = [];
-
-    public function __construct(private readonly PDO $connection)
+    public function __construct(private PDO $connection)
     {
     }
 
-    public function setTable(string $table): self
-    {
-        $this->table = $table;
-        return $this;
-    }
-
-    public function setPrimaryKey(string $primaryKey): self
-    {
-        $this->primaryKey = $primaryKey;
-        return $this;
-    }
-
-    public function setFillable(array $fillable): self
-    {
-        $this->fillable = $fillable;
-        return $this;
-    }
-
-    public function findById(int $id, array $fields = ['*']): ?array
+    public function findById(string $table, string $primaryKey, int $id, array $fields = ['*']): ?array
     {
         $fieldsString = implode(',', $fields);
-        $sql = "SELECT $fieldsString FROM $this->table WHERE $this->primaryKey = :id";
+        $sql = "SELECT $fieldsString FROM $table WHERE $primaryKey = :id";
         $results = $this->query($sql, [':id' => $id]);
         return $results ? $results[0] : null;
     }
 
-    public function findBy(string $sqlFragment, array $params = []): ?array
+    public function findBy(string $table, string $sqlFragment, array $params = []): ?array
     {
-        $sql = "SELECT * FROM $this->table $sqlFragment";
+        $sql = "SELECT * FROM $table $sqlFragment";
 
         $results = $this->query($sql, $params);
         return $results ? $results[0] : null;
     }
 
-    public function all(string $sqlFragment = '', array $params = []): array
+    public function all(string $table, string $sqlFragment = '', array $params = []): array
     {
-        $sql = "SELECT * FROM $this->table $sqlFragment";
+        $sql = "SELECT * FROM $table $sqlFragment";
         return $this->query($sql, $params);
     }
 
@@ -61,51 +39,36 @@ class Builder
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function insert(array $data): ?int
+    public function insert(string $table, array $data): ?int
     {
-        $data = $this->fillableData($data);
-
         $columns = implode(', ', array_keys($data));
         $values = ':' . implode(', :', array_keys($data));
 
-        $sql = "INSERT INTO $this->table ($columns) VALUES ($values)";
+        $sql = "INSERT INTO $table ($columns) VALUES ($values)";
 
         $stmt = $this->connection->prepare($sql);
         $success = $stmt->execute($data);
         return $success ? (int) $this->connection->lastInsertId() : null;
     }
 
-    public function update(int $id, array $data): bool
+    public function update(string $table, string $primaryKey, int $id, array $data): bool
     {
-        $data = $this->fillableData($data);
-        $data[$this->primaryKey] = $id;
+        $data[$primaryKey] = $id;
 
         $setClauses = [];
         foreach (array_keys($data) as $key) {
             $setClauses[] = "$key = :$key";
         }
-
-        $sql = "UPDATE $this->table SET " . implode(', ', $setClauses);
-        $sql .= " WHERE $this->primaryKey = :$this->primaryKey";
+        $sql = "UPDATE $table SET " . implode(', ', $setClauses);
+        $sql .= " WHERE $primaryKey = :$primaryKey";
 
         return $this->execute($sql, $data);
     }
 
-    public function delete(int $id): bool
+    public function delete(string $table, string $primaryKey, int $id): bool
     {
-        $sql = "DELETE FROM $this->table WHERE $this->primaryKey = :id";
+        $sql = "DELETE FROM $table WHERE $primaryKey = :id";
         return $this->execute($sql, [':id' => $id]);
-    }
-
-    private function fillableData(array $data): array
-    {
-        return array_filter(
-            $data,
-            function ($key) {
-                return in_array($key, $this->fillable, true);
-            },
-            ARRAY_FILTER_USE_KEY
-        );
     }
 
     public function execute(string $sql, array $params = []): bool
