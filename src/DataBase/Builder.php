@@ -4,9 +4,9 @@ namespace Core\DataBase;
 
 use PDO;
 
-readonly class Builder
+readonly class Builder implements BuilderInterface
 {
-    public function __construct(private PDO $connection)
+    public function __construct(private ConnectionInterface $connection)
     {
     }
 
@@ -32,11 +32,11 @@ readonly class Builder
         return $this->query($sql, $params);
     }
 
-    public function query(string $sql, array $params = []): array
+    public function query(string $sql, array $params = [], $fetch = PDO::FETCH_ASSOC): array
     {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll($fetch);
     }
 
     public function insert(string $table, array $data): ?int

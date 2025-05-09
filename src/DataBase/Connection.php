@@ -1,43 +1,38 @@
 <?php
-
 namespace Core\DataBase;
 
 use PDO;
+use PDOStatement;
 
-class Connection
-{
-    private static $instance = null;
+class Connection implements ConnectionInterface {
+    private PDO $pdo;
 
-    private function __construct()
-    {
+    public function __construct() {
+        $config = $this->loadConfig();
+        $dsn = "mysql:host={$config->host};dbname={$config->dbname};charset=utf8mb4";
+        $this->pdo = new PDO(
+            $dsn,
+            $config->user,
+            $config->password,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
     }
 
-    private static function config(): object
+    private function loadConfig(): object {
+        return json_decode(
+            file_get_contents(__DIR__ . '/../../env.json'),
+            false,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+    }
+    public function prepare(string $sql): false|PDOStatement
     {
-        $file = file_get_contents(__DIR__ . '/../../env.json');
-
-        return json_decode($file, false, 512, JSON_THROW_ON_ERROR);
+        return $this->pdo->prepare($sql);
     }
 
-    public static function connect(): PDO
+    public function lastInsertId(): string
     {
-        $conn = "mysql:";
-        $conn .= "host=" . self::config()->host . ";";
-        $conn .= "dbname=" . self::config()->dbname . ";";
-
-        if (is_null(self::$instance)) {
-            self::$instance = new PDO(
-                $conn,
-                self::config()->user,
-                self::config()->password,
-                [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"]
-            );
-        }
-        return self::$instance;
-    }
-
-    public static function reset(): void
-    {
-        self::$instance = null;
+        return $this->pdo->lastInsertId();
     }
 }
