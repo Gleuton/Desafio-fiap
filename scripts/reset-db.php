@@ -1,24 +1,27 @@
 <?php
 
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Core\DataBase\Connection;
+use Core\DataBase\Builder;
+use DI\ContainerBuilder;
+
+$containerBuilder = new ContainerBuilder();
+$containerBuilder->addDefinitions(__DIR__ . '/../src/config/container.php');
 
 try {
-    $pdo = Connection::connect();
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $container = $containerBuilder->build();
+    $connection = $container->get(Builder::class);
 
-    $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+    $connection->execute("SET FOREIGN_KEY_CHECKS = 0");
 
-    $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+    $tables = $connection->query("SHOW TABLES", [], PDO::FETCH_COLUMN);
 
     foreach ($tables as $table) {
-        $pdo->exec("DROP TABLE IF EXISTS `$table`");
+        $connection->execute("DROP TABLE IF EXISTS `$table`");
         echo "Tabela '$table' removida.\n";
     }
 
-    $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
+    $connection->execute("SET FOREIGN_KEY_CHECKS = 1");
 
     $dumpPath = __DIR__ . '/../dump.sql';
 
@@ -27,7 +30,7 @@ try {
     }
 
     $sql = file_get_contents($dumpPath);
-    $pdo->exec($sql);
+    $connection->execute($sql);
 
     echo "\nBanco de dados recriado com sucesso ✅\n";
 } catch (PDOException $e) {
