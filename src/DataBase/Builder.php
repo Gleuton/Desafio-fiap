@@ -4,9 +4,9 @@ namespace Core\DataBase;
 
 use PDO;
 
-readonly class Builder
+readonly class Builder implements BuilderInterface
 {
-    public function __construct(private PDO $connection)
+    public function __construct(private ConnectionInterface $connection)
     {
     }
 

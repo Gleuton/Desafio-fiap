@@ -2,8 +2,7 @@
 
 namespace FiapAdmin\Repositories;
 
-use Core\DataBase\Builder;
-use Core\DataBase\Connection;
+use Core\DataBase\BuilderInterface;
 
 abstract class Repository
 {
@@ -11,7 +10,7 @@ abstract class Repository
     protected string $primaryKey = 'id';
     protected array $fillable = [];
 
-    public function __construct(private readonly Builder $builder)
+    public function __construct(private readonly BuilderInterface $builder)
     {
     }
 
