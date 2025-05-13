@@ -16,7 +16,6 @@ readonly class StudentOperations
 {
     public function __construct(
         private StudentRepository $repository,
-        private StudentValidator $validator,
         private RoleRepository $roleRepository
     ) {
     }
@@ -40,22 +39,7 @@ readonly class StudentOperations
      */
     public function create(array $data): array
     {
-        $roleId = $this->roleRepository->roleId('student');
-        $name = new Name($data['name']);
-        $birthdate = new DateTime($data['birthdate']);
-        $cpf = new Cpf($data['cpf']);
-        $email = new Email($data['email']);
-        $password = new Password($data['password']);
-
-        $student = new Student(
-            null,
-            $name,
-            $cpf,
-            $email,
-            $birthdate,
-            $password,
-            $roleId
-        );
+        $student = $this->student($data);
 
         return [
             'success' => $this->repository->saveStudent($student),
@@ -63,17 +47,16 @@ readonly class StudentOperations
         ];
     }
 
-    public function update(?int $id, array $data): array
+    /**
+     * @throws DateMalformedStringException
+     * @throws ValidationException
+     */
+    public function update(array $data): array
     {
-        $validation = $this->validator->validateUpdate($id, $data);
-        if (!empty($validation)) {
-            return ['success' => false, 'errors' => $validation];
-        }
-
-        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+        $student = $this->student($data);
 
         return [
-            'success' => $this->repository->updateStudent($id, $data),
+            'success' => $this->repository->updateStudent($student),
             'data' => $data
         ];
     }
@@ -94,5 +77,30 @@ readonly class StudentOperations
             'success' => $this->repository->delete($id),
             'id' => $id
         ];
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     * @throws ValidationException
+     */
+    public function student(array $data): Student
+    {
+        $roleId = $this->roleRepository->roleId('student');
+        $name = new Name($data['name']);
+        $birthdate = new DateTime($data['birthdate']);
+        $cpf = new Cpf($data['cpf']);
+        $email = new Email($data['email']);
+        $password = new Password($data['password']);
+        $id = empty($data['id']) ? null : $data['id'];
+
+        return new Student(
+            $id,
+            $name,
+            $cpf,
+            $email,
+            $birthdate,
+            $password,
+            $roleId
+        );
     }
 }

@@ -61,10 +61,21 @@ readonly class StudentController
     {
         $body = $request->getBody();
         $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
-        $result = $this->student->update($id, $data);
+        $data['id'] = $id;
 
-        if (!$result['success']) {
-            return new JsonResponse($result['errors'], 422);
+        try {
+            $result = $this->student->update($data);
+        } catch (ValidationException $e) {
+            $jsonException = json_decode($e->getMessage(), true, 512, JSON_THROW_ON_ERROR);
+            return new JsonResponse(
+                ['error' => $jsonException],
+                422
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['Error' => $e->getMessage()],
+                500
+            );
         }
 
         return new JsonResponse($result, 201);

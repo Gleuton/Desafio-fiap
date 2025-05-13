@@ -38,14 +38,7 @@ class StudentRepository extends Repository
      */
     public function saveStudent(Student $student): array
     {
-        $data = [
-            'name' => $student->name(),
-            'birthdate' => $student->birthdate(),
-            'cpf' => $student->cpf(),
-            'email' => $student->email(),
-            'password' => $student->password(),
-            'role_id' => $student->roleId(),
-        ];
+        $data = $this->mapStudentToArray($student);
 
         if ($this->cpfExists($data['cpf'])) {
             throw new ValidationException('cpf', 'CPF já cadastrado');
@@ -59,10 +52,24 @@ class StudentRepository extends Repository
         return $this->findById($newId);
     }
 
-    public function updateStudent(int $id, array $data): array
+    /**
+     * @throws ValidationException
+     */
+    public function updateStudent(Student $student): array
     {
-        $newId = $this->update($id, $data);
-        return $this->findById($newId);
+        $id = $student->id();
+        $data = $this->mapStudentToArray($student);
+
+        if ($this->cpfExists($data['cpf'], $id)) {
+            throw new ValidationException('cpf', 'CPF já cadastrado');
+        }
+
+        if ($this->emailExists($data['email'], $id)) {
+            throw new ValidationException('email', 'E-mail já cadastrado');
+        }
+
+        $this->update($id, $data);
+        return $this->findById($id);
     }
 
     public function cpfExists(string $cpf, ?int $excludeId = null): bool
@@ -139,5 +146,22 @@ class StudentRepository extends Repository
         }
 
         return $this->query($sql, $params);
+    }
+
+    /**
+     * @param Student $student
+     * @return array
+     */
+    public function mapStudentToArray(Student $student): array
+    {
+        $data = [
+            'name' => $student->name(),
+            'birthdate' => $student->birthdate(),
+            'cpf' => $student->cpf(),
+            'email' => $student->email(),
+            'password' => $student->password(),
+            'role_id' => $student->roleId(),
+        ];
+        return $data;
     }
 }
