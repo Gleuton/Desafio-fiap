@@ -5,19 +5,19 @@ namespace Tests\Unit\Controllers;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use FiapAdmin\Controllers\StudentController;
-use FiapAdmin\Models\Student\Student;
+use FiapAdmin\Models\Student\StudentOperations;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 
 class StudentControllerTest extends TestCase
 {
-    private MockObject|Student $studentMock;
+    private MockObject|StudentOperations $studentMock;
     private MockObject|StudentController $controller;
 
     protected function setUp(): void
     {
-        $this->studentMock = $this->createMock(Student::class);
+        $this->studentMock = $this->createMock(StudentOperations::class);
         $this->controller = new StudentController();
         $this->setPrivateProperty($this->controller, 'student', $this->studentMock);
     }

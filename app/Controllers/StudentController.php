@@ -2,7 +2,10 @@
 
 namespace FiapAdmin\Controllers;
 
-use FiapAdmin\Models\Student\Student;
+use Exception;
+use FiapAdmin\Exceptions\DuplicationException;
+use FiapAdmin\Exceptions\ValidationException;
+use FiapAdmin\Models\Student\StudentOperations;
 use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -10,7 +13,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 readonly class StudentController
 {
-    public function __construct(private Student $student)
+    public function __construct(private StudentOperations $student)
     {
     }
 
@@ -28,10 +31,20 @@ readonly class StudentController
     {
         $body = $request->getBody();
         $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
-        $result = $this->student->create($data);
 
-        if (!$result['success']) {
-            return new JsonResponse($result['errors'], 422);
+        try {
+            $result = $this->student->create($data);
+        } catch (ValidationException $e) {
+            $jsonException = json_decode($e->getMessage(), true, 512, JSON_THROW_ON_ERROR);
+            return new JsonResponse(
+                ['error' => $jsonException],
+                422
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['Error' => $e->getMessage()],
+                500
+            );
         }
 
         return new JsonResponse($result, 201);

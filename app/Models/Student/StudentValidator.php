@@ -10,24 +10,6 @@ readonly class StudentValidator
     {
     }
 
-    public function validateCreate(array $data): array
-    {
-        $errors = [];
-
-        $required = ['name', 'birthdate', 'cpf', 'email', 'password'];
-        foreach ($required as $field) {
-            if (empty($data[$field])) {
-                $errors[$field] = ucfirst($field) . ' é obrigatório';
-            }
-        }
-
-        if (!empty($errors)) {
-            return $errors;
-        }
-
-        return array_merge($errors, $this->validateCommon($data));
-    }
-
     public function validateUpdate(?int $id, array $data): array
     {
         $errors = [];
@@ -77,10 +59,6 @@ readonly class StudentValidator
             $errors['password'] = 'Senha deve ter 8+ caracteres, com maiúsculas, minúsculas, números e símbolos';
         }
 
-        if (isset($data['cpf']) && !$this->validateCPF($data['cpf'])) {
-            $errors['cpf'] = 'CPF inválido';
-        }
-
         if (isset($data['birthdate']) && !$this->validateDate($data['birthdate'])) {
             $errors['birthdate'] = 'Data de nascimento inválida';
         }
@@ -90,28 +68,6 @@ readonly class StudentValidator
         }
 
         return $errors;
-    }
-
-    private function validateCPF(string $cpf): bool
-    {
-        $cpf = preg_replace('/[^0-9]/', '', $cpf);
-        if (strlen($cpf) !== 11 || preg_match('/(\d)\1{10}/', $cpf)) {
-            return false;
-        }
-
-        for ($i = 0, $sum = 0, $weight = 10; $i < 9; $i++) {
-            $sum += (int)$cpf[$i] * $weight--;
-        }
-        $checkDigit = ($sum % 11) < 2 ? 0 : 11 - ($sum % 11);
-        if ($checkDigit != $cpf[9]) {
-            return false;
-        }
-
-        for ($i = 0, $sum = 0, $weight = 11; $i < 10; $i++) {
-            $sum += (int)$cpf[$i] * $weight--;
-        }
-        $checkDigit = ($sum % 11) < 2 ? 0 : 11 - ($sum % 11);
-        return $checkDigit == $cpf[10];
     }
 
     private function validatePassword(string $password): bool
