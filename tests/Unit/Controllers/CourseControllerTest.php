@@ -5,13 +5,14 @@ namespace Tests\Unit\Controllers;
 use FiapAdmin\Controllers\CourseController;
 use FiapAdmin\Models\Course\Course;
 use Laminas\Diactoros\Response\JsonResponse;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\StreamInterface;
 
 class CourseControllerTest extends TestCase
 {
-    private Course $courseMock;
+    private MockObject|Course $courseMock;
     private CourseController $controller;
 
     protected function setUp(): void
