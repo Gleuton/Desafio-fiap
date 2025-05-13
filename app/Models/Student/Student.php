@@ -49,6 +49,6 @@ readonly class Student
 
     public function password(): ?string
     {
-        return $this->password->value();
+        return $this->password?->value();
     }
 }
