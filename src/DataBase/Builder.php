@@ -23,6 +23,7 @@ readonly class Builder implements BuilderInterface
         $sql = "SELECT * FROM $table $sqlFragment";
 
         $results = $this->query($sql, $params);
+
         return $results ? $results[0] : null;
     }
 

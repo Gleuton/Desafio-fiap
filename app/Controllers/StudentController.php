@@ -2,8 +2,15 @@
 
 namespace FiapAdmin\Controllers;
 
+use DateMalformedStringException;
+use DateTime;
 use Exception;
 use FiapAdmin\Exceptions\ValidationException;
+use FiapAdmin\Models\Cpf;
+use FiapAdmin\Models\Email;
+use FiapAdmin\Models\Name;
+use FiapAdmin\Models\Password;
+use FiapAdmin\Models\Student\Student;
 use FiapAdmin\Models\Student\StudentOperations;
 use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -32,7 +39,8 @@ readonly class StudentController
         $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         try {
-            $result = $this->student->create($data);
+            $student = $this->student($data);
+            $result = $this->student->create($student);
         } catch (ValidationException $e) {
             $jsonException = json_decode($e->getMessage(), true, 512, JSON_THROW_ON_ERROR);
             return new JsonResponse(
@@ -64,7 +72,8 @@ readonly class StudentController
         $data['id'] = $id;
 
         try {
-            $result = $this->student->update($data);
+            $student = $this->student($data);
+            $result = $this->student->update($student);
         } catch (ValidationException $e) {
             $jsonException = json_decode($e->getMessage(), true, 512, JSON_THROW_ON_ERROR);
             return new JsonResponse(
@@ -88,5 +97,28 @@ readonly class StudentController
             return new JsonResponse($result['errors'], 422);
         }
         return new JsonResponse([], 201);
+    }
+
+    /**
+     * @throws ValidationException
+     * @throws DateMalformedStringException
+     */
+    private function student(array $data): Student
+    {
+        $name = new Name($data['name']);
+        $birthdate = new DateTime($data['birthdate']);
+        $cpf = new Cpf($data['cpf']);
+        $email = new Email($data['email']);
+        $password = empty($data['password']) ? null : new Password($data['password']);
+        $id = empty($data['id']) ? null : $data['id'];
+
+        return new Student(
+            $id,
+            $name,
+            $cpf,
+            $email,
+            $birthdate,
+            $password,
+        );
     }
 }

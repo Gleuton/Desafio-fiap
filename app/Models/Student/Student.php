@@ -10,6 +10,8 @@ use FiapAdmin\Models\Password;
 
 readonly class Student
 {
+    public const string ROLE = 'student';
+
     public function __construct(
         private ?int $id,
         private Name $name,
@@ -17,7 +19,6 @@ readonly class Student
         private Email $email,
         private DateTime $birthdate,
         private ?Password $password,
-        private ?int $roleId
     ) {
     }
 
@@ -49,10 +50,5 @@ readonly class Student
     public function password(): ?string
     {
         return $this->password->value();
-    }
-
-    public function roleId(): int
-    {
-        return $this->roleId;
     }
 }

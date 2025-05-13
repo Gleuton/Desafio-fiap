@@ -2,6 +2,7 @@
 
 namespace FiapAdmin\Repositories;
 
+use Core\DataBase\BuilderInterface;
 use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Student\Student;
 
@@ -16,6 +17,11 @@ class StudentRepository extends Repository
         'password',
         'role_id'
     ];
+
+    public function __construct(BuilderInterface $builder, private RoleRepository $roleRepository)
+    {
+        parent::__construct($builder);
+    }
 
     public function findAll(): array
     {
@@ -154,14 +160,14 @@ class StudentRepository extends Repository
      */
     public function mapStudentToArray(Student $student): array
     {
-        $data = [
+        $roleId = $this->roleRepository->roleId(Student::ROLE);
+        return [
             'name' => $student->name(),
             'birthdate' => $student->birthdate(),
             'cpf' => $student->cpf(),
             'email' => $student->email(),
             'password' => $student->password(),
-            'role_id' => $student->roleId(),
+            'role_id' => $roleId,
         ];
-        return $data;
     }
 }
