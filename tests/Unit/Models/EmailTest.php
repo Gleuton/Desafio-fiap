@@ -19,11 +19,11 @@ class EmailTest extends TestCase
     public static function validEmailProvider(): array
     {
         return [
-            'simple lowercase'       => ['user@example.com'],
-            'uppercase trimmed'      => ['  USER@EXAMPLE.COM  '],
-            'mixed case'             => ['User.Name@Example.Co.Uk'],
-            'with plus alias'        => ['alias+test@gmail.com'],
-            'with subdomain'         => ['user@mail.server.example.com'],
+            'simple lowercase' => ['user@example.com'],
+            'uppercase trimmed' => ['  USER@EXAMPLE.COM  '],
+            'mixed case' => ['User.Name@Example.Co.Uk'],
+            'with plus alias' => ['alias+test@gmail.com'],
+            'with subdomain' => ['user@mail.server.example.com'],
         ];
     }
 
@@ -38,15 +38,15 @@ class EmailTest extends TestCase
     public static function invalidEmailProvider(): array
     {
         return [
-            'no at'                  => ['userexample.com'],
-            'multiple ats'           => ['user@@example.com'],
-            'leading dot'            => ['.user@example.com'],
-            'trailing dot'           => ['user.@example.com'],
-            'consecutive dots'       => ['user..name@example.com'],
-            'missing domain'         => ['user@'],
-            'missing local part'     => ['@example.com'],
-            'spaces inside'          => ['user@ example.com'],
-            'unicode chars'          => ['usér@example.com'],
+            'no at' => ['userexample.com'],
+            'multiple ats' => ['user@@example.com'],
+            'leading dot' => ['.user@example.com'],
+            'trailing dot' => ['user.@example.com'],
+            'consecutive dots' => ['user..name@example.com'],
+            'missing domain' => ['user@'],
+            'missing local part' => ['@example.com'],
+            'spaces inside' => ['user@ example.com'],
+            'unicode chars' => ['usér@example.com'],
         ];
     }
 }

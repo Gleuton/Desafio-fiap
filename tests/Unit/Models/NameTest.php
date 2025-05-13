@@ -21,10 +21,10 @@ class NameTest extends TestCase
     public static function validNameProvider(): array
     {
         return [
-            'exactly 4 chars'    => ['John'],
-            'longer name'         => ['Elizabeth'],
-            'with spaces'         => ['Ana Maria'],
-            'with hyphen'         => ['Jean-Luc'],
+            'exactly 4 chars' => ['John'],
+            'longer name' => ['Elizabeth'],
+            'with spaces' => ['Ana Maria'],
+            'with hyphen' => ['Jean-Luc'],
         ];
     }
 
@@ -38,9 +38,9 @@ class NameTest extends TestCase
     public static function invalidNameProvider(): array
     {
         return [
-            'too short'           => ['Tom'],
-            'empty string'        => [''],
-            'three spaces'        => ['   '],
+            'too short' => ['Tom'],
+            'empty string' => [''],
+            'three spaces' => ['   '],
             'three chars letters' => ['Ana'],
         ];
     }

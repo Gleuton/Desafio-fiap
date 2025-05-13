@@ -180,7 +180,7 @@ class StudentControllerTest extends TestCase
             'cpf' => '123.456.789-09',
             'email' => 'john@example.com',
             'birthdate' => '1990-01-01',
-            'password' => 'password123',
+            'password' => 'Password@123',
         ];
 
         $studentMock = $this->createMock(Student::class);
@@ -192,7 +192,7 @@ class StudentControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $request->method('getBody')->willReturn($stream);
 
-        $this->studentOperationsMock->method('update')->with($studentMock)->willReturn($result);
+        $this->studentOperationsMock->method('update')->willReturn($result);
 
         $reflection = new \ReflectionClass($this->controller);
         $method = $reflection->getMethod('student');
