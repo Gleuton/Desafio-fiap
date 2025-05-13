@@ -3,7 +3,6 @@
 namespace FiapAdmin\Controllers;
 
 use Exception;
-use FiapAdmin\Exceptions\DuplicationException;
 use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Student\StudentOperations;
 use JsonException;

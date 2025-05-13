@@ -4,7 +4,6 @@ namespace FiapAdmin\Models\Student;
 
 use DateMalformedStringException;
 use DateTime;
-use FiapAdmin\Exceptions\DuplicationException;
 use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Cpf;
 use FiapAdmin\Models\Email;
