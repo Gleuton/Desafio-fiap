@@ -35,10 +35,10 @@ readonly class StudentController
      */
     public function create(Request $request): Response
     {
-        $body = $request->getBody();
-        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
-
         try {
+            $body = $request->getBody();
+            $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
             $student = $this->student($data);
             $result = $this->student->create($student);
         } catch (ValidationException $e) {
@@ -67,11 +67,11 @@ readonly class StudentController
      */
     public function update(Request $request, ?int $id): Response
     {
-        $body = $request->getBody();
-        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
-        $data['id'] = $id;
-
         try {
+            $body = $request->getBody();
+            $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            $data['id'] = $id;
+
             $student = $this->student($data);
             $result = $this->student->update($student);
         } catch (ValidationException $e) {

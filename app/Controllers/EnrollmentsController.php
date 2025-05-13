@@ -10,7 +10,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 readonly class EnrollmentsController
 {
-
     public function __construct(private Enrollments $enrollments)
     {
     }
