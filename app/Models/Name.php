@@ -16,7 +16,7 @@ readonly class Name
         }
 
         if (!$this->isValid()) {
-            throw new ValidationException('name', 'Nome deve ter pelo menos 4 caracteres');
+            throw new ValidationException('name', 'Nome deve ter pelo menos 3 caracteres');
         }
     }
 
@@ -27,6 +27,6 @@ readonly class Name
 
     private function isValid(): bool
     {
-        return strlen(trim($this->name)) > 3;
+        return strlen(trim($this->name)) > 2;
     }
 }
