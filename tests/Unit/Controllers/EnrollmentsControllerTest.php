@@ -3,7 +3,9 @@
 namespace Tests\Unit\Controllers;
 
 use FiapAdmin\Controllers\EnrollmentsController;
-use FiapAdmin\Models\Enrollment\Enrollments;
+use FiapAdmin\Exceptions\ValidationException;
+use FiapAdmin\Models\Enrollment\Enrollment;
+use FiapAdmin\Models\Enrollment\EnrollmentService;
 use Laminas\Diactoros\Response\JsonResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\ServerRequestInterface as RequestInterface;
@@ -12,19 +14,44 @@ use PHPUnit\Framework\TestCase;
 
 class EnrollmentsControllerTest extends TestCase
 {
-    private MockObject|Enrollments $enrollmentsMock;
+    private MockObject|EnrollmentService $enrollmentServiceMock;
     private EnrollmentsController $controller;
 
     protected function setUp(): void
     {
-        $this->enrollmentsMock = $this->createMock(Enrollments::class);
-        $this->controller = new EnrollmentsController($this->enrollmentsMock);
+        $this->enrollmentServiceMock = $this->createMock(EnrollmentService::class);
+        $this->controller = new EnrollmentsController($this->enrollmentServiceMock);
+    }
+
+    public function testIndexReturnsData(): void
+    {
+        $page = 1;
+        $limit = 10;
+        $responseData = [
+            'enrollments' => [
+                ['id' => 1, 'user_id' => 100, 'course_id' => 200],
+                ['id' => 2, 'user_id' => 101, 'course_id' => 201],
+            ],
+            'totalPages' => 1,
+            'currentPage' => 1
+        ];
+
+        $request = $this->createMock(RequestInterface::class);
+        $request->method('getQueryParams')->willReturn(['page' => $page, 'limit' => $limit]);
+
+        $this->enrollmentServiceMock->method('index')->with($page, $limit)->willReturn($responseData);
+
+        $response = $this->controller->index($request);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals($responseData, $response->getPayload());
     }
 
     public function testCreateReturns201OnSuccess(): void
     {
         $requestData = ['student_id' => 1, 'course_id' => 2];
-        $responseData = ['success' => true, 'id' => 1];
+        $responseData = ['success' => true, 'data' => ['id' => 1, 'user_id' => 1, 'course_id' => 2]];
 
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('getContents')->willReturn(json_encode($requestData));
@@ -32,7 +59,12 @@ class EnrollmentsControllerTest extends TestCase
         $request = $this->createMock(RequestInterface::class);
         $request->method('getBody')->willReturn($stream);
 
-        $this->enrollmentsMock->method('create')->with($requestData)->willReturn($responseData);
+        $this->enrollmentServiceMock->method('create')
+            ->willReturnCallback(function (Enrollment $enrollment) use ($responseData) {
+                $this->assertEquals(1, $enrollment->userId());
+                $this->assertEquals(2, $enrollment->courseId());
+                return $responseData;
+            });
 
         $response = $this->controller->create($request);
 
@@ -43,8 +75,9 @@ class EnrollmentsControllerTest extends TestCase
 
     public function testCreateReturns422OnValidationFailure(): void
     {
-        $requestData = ['student_id' => '', 'course_id' => 2];
-        $responseData = ['success' => false, 'errors' => ['student_id' => 'Invalid student ID']];
+        $requestData = ['student_id' => 1, 'course_id' => 2];
+        $field = 'enrollment';
+        $errorMessage = 'Este aluno já está matriculado nesta turma!';
 
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('getContents')->willReturn(json_encode($requestData));
@@ -52,26 +85,27 @@ class EnrollmentsControllerTest extends TestCase
         $request = $this->createMock(RequestInterface::class);
         $request->method('getBody')->willReturn($stream);
 
-        $this->enrollmentsMock->method('create')->with($requestData)->willReturn($responseData);
+        $this->enrollmentServiceMock->method('create')
+            ->willThrowException(new ValidationException($field, $errorMessage));
 
         $response = $this->controller->create($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(422, $response->getStatusCode());
-        $this->assertEquals($responseData['errors'], $response->getPayload());
+        $this->assertEquals(['errors' => [$field => $errorMessage]], $response->getPayload());
     }
 
-    public function testCreateThrowsJsonExceptionOnInvalidJson(): void
+    public function testShowReturnsData(): void
     {
-        $stream = $this->createMock(StreamInterface::class);
-        $stream->method('getContents')->willReturn('invalid-json');
+        $enrollmentId = 1;
+        $responseData = ['id' => $enrollmentId, 'user_id' => 100, 'course_id' => 200];
 
-        $request = $this->createMock(RequestInterface::class);
-        $request->method('getBody')->willReturn($stream);
+        $this->enrollmentServiceMock->method('findById')->with($enrollmentId)->willReturn($responseData);
 
-        $this->expectException(\JsonException::class);
+        $response = $this->controller->show($this->createMock(RequestInterface::class), $enrollmentId);
 
-        $this->controller->create($request);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals($responseData, $response->getPayload());
     }
 
     public function testListByCursesReturnsData(): void
@@ -82,7 +116,7 @@ class EnrollmentsControllerTest extends TestCase
             ['id' => 2, 'student_id' => 101, 'course_id' => $courseId],
         ];
 
-        $this->enrollmentsMock->method('listByCurses')->with($courseId)->willReturn($responseData);
+        $this->enrollmentServiceMock->method('findByCourseId')->with($courseId)->willReturn($responseData);
 
         $response = $this->controller->listByCurses($this->createMock(RequestInterface::class), $courseId);
 
@@ -90,11 +124,39 @@ class EnrollmentsControllerTest extends TestCase
         $this->assertEquals($responseData, $response->getPayload());
     }
 
-    public function testDeleteCallsModelAndReturns201(): void
+    public function testUpdateReturns201OnSuccess(): void
     {
         $enrollmentId = 1;
+        $requestData = ['user_id' => 1, 'course_id' => 2];
+        $responseData = ['success' => true, 'data' => ['user_id' => 1, 'course_id' => 2]];
 
-        $this->enrollmentsMock->expects($this->once())->method('delete')->with($enrollmentId);
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($requestData));
+
+        $request = $this->createMock(RequestInterface::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $this->enrollmentServiceMock->method('update')
+            ->willReturnCallback(function (Enrollment $enrollment) use ($responseData, $enrollmentId) {
+                $this->assertEquals($enrollmentId, $enrollment->id());
+                $this->assertEquals(1, $enrollment->userId());
+                $this->assertEquals(2, $enrollment->courseId());
+                return $responseData;
+            });
+
+        $response = $this->controller->update($request, $enrollmentId);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(201, $response->getStatusCode());
+        $this->assertEquals($responseData, $response->getPayload());
+    }
+
+    public function testDeleteCallsServiceAndReturns201(): void
+    {
+        $enrollmentId = 1;
+        $responseData = ['success' => true, 'id' => $enrollmentId];
+
+        $this->enrollmentServiceMock->method('delete')->with($enrollmentId)->willReturn($responseData);
 
         $response = $this->controller->delete($this->createMock(RequestInterface::class), $enrollmentId);
 

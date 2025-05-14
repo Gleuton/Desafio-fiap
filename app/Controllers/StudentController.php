@@ -12,7 +12,6 @@ use FiapAdmin\Models\Name;
 use FiapAdmin\Models\Password;
 use FiapAdmin\Models\Student\Student;
 use FiapAdmin\Models\Student\StudentService;
-use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -58,9 +57,6 @@ readonly class StudentController
         return new JsonResponse($this->student->findById($id));
     }
 
-    /**
-     * @throws JsonException
-     */
     public function update(Request $request, ?int $id): Response
     {
         try {

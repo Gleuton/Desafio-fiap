@@ -8,7 +8,6 @@ use FiapAdmin\Models\Course\Course;
 use FiapAdmin\Models\Course\CourseService;
 use FiapAdmin\Models\Description;
 use FiapAdmin\Models\Name;
-use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface;
