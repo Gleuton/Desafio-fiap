@@ -5,7 +5,7 @@ namespace Tests\Unit\Controllers;
 use FiapAdmin\Controllers\StudentController;
 use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Student\Student;
-use FiapAdmin\Models\Student\StudentOperations;
+use FiapAdmin\Models\Student\StudentService;
 use Laminas\Diactoros\Response\JsonResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -14,12 +14,12 @@ use Psr\Http\Message\StreamInterface;
 
 class StudentControllerTest extends TestCase
 {
-    private MockObject|StudentOperations $studentOperationsMock;
+    private MockObject|StudentService $studentOperationsMock;
     private StudentController $controller;
 
     protected function setUp(): void
     {
-        $this->studentOperationsMock = $this->createMock(StudentOperations::class);
+        $this->studentOperationsMock = $this->createMock(StudentService::class);
         $this->controller = new StudentController($this->studentOperationsMock);
     }
 

@@ -11,7 +11,7 @@ use FiapAdmin\Models\Email;
 use FiapAdmin\Models\Name;
 use FiapAdmin\Models\Password;
 use FiapAdmin\Models\Student\Student;
-use FiapAdmin\Models\Student\StudentOperations;
+use FiapAdmin\Models\Student\StudentService;
 use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -19,7 +19,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 readonly class StudentController
 {
-    public function __construct(private StudentOperations $student)
+    public function __construct(private StudentService $student)
     {
     }
 

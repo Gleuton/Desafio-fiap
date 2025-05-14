@@ -5,7 +5,7 @@ namespace FiapAdmin\Models\Student;
 use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Repositories\StudentRepository;
 
-readonly class StudentOperations
+readonly class StudentService
 {
     public function __construct(
         private StudentRepository $repository,
