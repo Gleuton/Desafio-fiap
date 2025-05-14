@@ -4,9 +4,16 @@ function resetFormValidation(form) {
     form.querySelectorAll('.is-invalid').forEach(input => {
         input.classList.remove('is-invalid');
     });
+}
 
-    form.querySelectorAll('.invalid-feedback').forEach(feedback => {
-        feedback.textContent = '';
+function setupFormFieldValidation(form) {
+    form.querySelectorAll('input, textarea, select').forEach(field => {
+        field.addEventListener('input', function() {
+            if (this.checkValidity()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
     });
 }
 

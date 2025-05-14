@@ -152,6 +152,7 @@ function configureModal() {
 
         const form = document.getElementById('classForm');
         form.addEventListener('submit', handleSubmit);
+        setupFormFieldValidation(form);
 
         const trigger = event.relatedTarget;
         const action = trigger?.dataset.action || 'create';
@@ -183,12 +184,15 @@ async function handleSubmit(e) {
     const method = form.dataset.action === 'edit' ? 'PUT' : 'POST';
     const url = `/api/courses${form.dataset.action === 'edit' ? '/' + formData.get('id') : ''}`;
 
-    resetFormValidation(form);
-
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
+        form.querySelectorAll(':invalid').forEach(input => {
+            input.classList.add('is-invalid');
+        });
         return;
     }
+
+    resetFormValidation(form);
 
     try {
         const response = await fetchWithTokenRefresh(url, {
