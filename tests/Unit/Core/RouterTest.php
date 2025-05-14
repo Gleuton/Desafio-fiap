@@ -19,6 +19,7 @@ class RouterTest extends TestCase
 {
     private RouteDispatcher $router;
     private ServerRequestInterface $request;
+    private ContainerInterface $container;
 
     protected function setUp(): void
     {
