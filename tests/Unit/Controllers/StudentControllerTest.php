@@ -2,175 +2,298 @@
 
 namespace Tests\Unit\Controllers;
 
+use FiapAdmin\Controllers\StudentController;
+use FiapAdmin\Exceptions\ValidationException;
+use FiapAdmin\Models\Student\Student;
+use FiapAdmin\Models\Student\StudentService;
+use Laminas\Diactoros\Response\JsonResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use FiapAdmin\Controllers\StudentController;
-use FiapAdmin\Models\Student\Student;
-use Laminas\Diactoros\Response\JsonResponse;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\StreamInterface;
 
 class StudentControllerTest extends TestCase
 {
-    private MockObject|Student $studentMock;
-    private MockObject|StudentController $controller;
+    private MockObject|StudentService $studentOperationsMock;
+    private StudentController $controller;
 
     protected function setUp(): void
     {
-        $this->studentMock = $this->createMock(Student::class);
-        $this->controller = new StudentController();
-        $this->setPrivateProperty($this->controller, 'student', $this->studentMock);
+        $this->studentOperationsMock = $this->createMock(StudentService::class);
+        $this->controller = new StudentController($this->studentOperationsMock);
     }
 
-    private function setPrivateProperty($object, $property, $value): void
+    public function testIndexCallsAllWithQueryParams(): void
     {
-        $reflection = new \ReflectionClass($object);
-        $reflectionProperty = $reflection->getProperty($property);
-        $reflectionProperty->setValue($object, $value);
-    }
+        $queryParams = ['name' => 'John', 'limit' => 5];
+        $responseData = [['id' => 1, 'name' => 'John Doe']];
 
-    public function testIndex(): void
-    {
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getQueryParams')->willReturn(['name' => 'John', 'limit' => 10]);
+        $request = $this->createMock(Request::class);
+        $request->method('getQueryParams')->willReturn($queryParams);
+        $this->studentOperationsMock->method('all')->with('John', 5)->willReturn($responseData);
 
-        $this->studentMock->expects($this->once())
-            ->method('all')
-            ->with('John', 10)
-            ->willReturn(['students' => [['id' => 1, 'name' => 'John Doe']]]);
-
-        $response = $this->controller->index($requestMock);
+        $response = $this->controller->index($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['students' => [['id' => 1, 'name' => 'John Doe']]], json_decode($response->getBody(), true));
+        $this->assertEquals($responseData, $response->getPayload());
     }
 
-    public function testCreateSuccess(): void
+    public function testCreateReturns201OnSuccess(): void
     {
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-        $streamMock->method('getContents')->willReturn(json_encode(['name' => 'Jane Doe']));
-        $requestMock->method('getBody')->willReturn($streamMock);
+        $data = [
+            'name' => 'John Doe',
+            'cpf' => '123.456.789-09',
+            'email' => 'john@example.com',
+            'birthdate' => '1990-01-01',
+            'password' => 'Password@123',
+        ];
 
-        $this->studentMock->expects($this->once())
-            ->method('create')
-            ->with(['name' => 'Jane Doe'])
-            ->willReturn(['success' => true, 'data' => ['id' => 1]]);
+        $result = ['success' => true, 'id' => 1];
 
-        $response = $this->controller->create($requestMock);
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($data));
+
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $this->studentOperationsMock->method('create')->willReturn($result);
+
+        $reflection = new \ReflectionClass($this->controller);
+        $method = $reflection->getMethod('student');
+        $method->invoke($this->controller, $data);
+
+        $response = $this->controller->create($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['success' => true, 'data' => ['id' => 1]], json_decode($response->getBody(), true));
         $this->assertEquals(201, $response->getStatusCode());
+        $this->assertEquals($result, $response->getPayload());
     }
 
-    public function testCreateFailure(): void
+    public function testCreateReturns422OnValidationExceptionFromStudentOperations(): void
     {
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-        $streamMock->method('getContents')->willReturn(json_encode(['name' => 'Invalid Name']));
-        $requestMock->method('getBody')->willReturn($streamMock);
+        $data = [
+            'name' => 'John Doe',
+            'cpf' => '123.456.789-09',
+            'email' => 'john@example.com',
+            'birthdate' => '1990-01-01',
+            'password' => 'Password@123',
+        ];
 
-        $this->studentMock->expects($this->once())
-            ->method('create')
-            ->with(['name' => 'Invalid Name'])
-            ->willReturn(['success' => false, 'errors' => ['Invalid data']]);
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($data));
 
-        $response = $this->controller->create($requestMock);
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $exceptionMessage = 'Name is too short';
+        $this->studentOperationsMock->method('create')->willThrowException(new ValidationException('name', $exceptionMessage));
+
+        $response = $this->controller->create($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['Invalid data'], json_decode($response->getBody(), true));
         $this->assertEquals(422, $response->getStatusCode());
+
+        $this->assertEquals(['error' => ['name' => 'Name is too short']], $response->getPayload());
     }
 
-    public function testShow(): void
+    public function testCreateReturns422WhenFactoryThrowsValidationException(): void
     {
-        $id = '1';
+        $data = [
+            'name' => '',
+            'cpf' => 'invalid',
+            'email' => 'invalid',
+            'birthdate' => 'invalid',
+        ];
 
-        $this->studentMock->expects($this->once())
-            ->method('findById')
-            ->with($id)
-            ->willReturn(['id' => $id, 'name' => 'John Doe']);
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($data));
 
-        $response = $this->controller->show($id);
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $this->studentOperationsMock->expects($this->never())->method('create');
+
+        $response = $this->controller->create($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['id' => $id, 'name' => 'John Doe'], json_decode($response->getBody(), true));
+        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertArrayHasKey('error', $response->getPayload());
     }
 
-    public function testUpdateSuccess(): void
+    public function testCreateReturns500OnJsonException(): void
     {
-        $id = 1;
-        $requestData = ['name' => 'Updated Name'];
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn('invalid-json');
 
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-        $streamMock->method('getContents')->willReturn(json_encode($requestData));
-        $requestMock->method('getBody')->willReturn($streamMock);
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
 
-        $this->studentMock->expects($this->once())
-            ->method('update')
-            ->with($id, $requestData)
-            ->willReturn(['success' => true, 'data' => ['id' => $id, 'name' => 'Updated Name']]);
-
-        $response = $this->controller->update($requestMock, $id);
+        $response = $this->controller->create($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['success' => true, 'data' => ['id' => $id, 'name' => 'Updated Name']], json_decode($response->getBody(), true));
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertArrayHasKey('Error', $response->getPayload());
+    }
+
+    public function testCreateReturns500OnOtherException(): void
+    {
+        $data = [
+            'name' => 'John Doe',
+            'cpf' => '123.456.789-09',
+            'email' => 'john@example.com',
+            'birthdate' => '1990-01-01',
+        ];
+
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($data));
+
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $this->studentOperationsMock->method('create')->willThrowException(new \Exception('Database error'));
+
+        $response = $this->controller->create($request);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertEquals(['Error' => 'Database error'], $response->getPayload());
+    }
+
+    public function testShowReturnsStudentData(): void
+    {
+        $studentData = ['id' => 1, 'name' => 'John Doe'];
+
+        $request = $this->createMock(Request::class);
+        $this->studentOperationsMock->method('findById')->with(1)->willReturn($studentData);
+
+        $response = $this->controller->show($request, 1);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals($studentData, $response->getPayload());
+    }
+
+    public function testUpdateReturns201OnSuccess(): void
+    {
+        $data = [
+            'id' => 1,
+            'name' => 'John Doe',
+            'cpf' => '123.456.789-09',
+            'email' => 'john@example.com',
+            'birthdate' => '1990-01-01',
+            'password' => 'Password@123',
+        ];
+
+        $studentMock = $this->createMock(Student::class);
+        $result = ['success' => true];
+
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($data));
+
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $this->studentOperationsMock->method('update')->willReturn($result);
+
+        $reflection = new \ReflectionClass($this->controller);
+        $method = $reflection->getMethod('student');
+        $method->invoke($this->controller, $data);
+
+        $response = $this->controller->update($request, 1);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(201, $response->getStatusCode());
+        $this->assertEquals($result, $response->getPayload());
     }
 
-    public function testUpdateFailure(): void
+    public function testDeleteReturns201OnSuccess(): void
     {
-        $id = 1;
-        $requestData = ['name' => 'Invalid Name'];
+        $request = $this->createMock(Request::class);
+        $this->studentOperationsMock->method('delete')->with(1)->willReturn(['success' => true]);
 
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-        $streamMock->method('getContents')->willReturn(json_encode($requestData));
-        $requestMock->method('getBody')->willReturn($streamMock);
-
-        $this->studentMock->expects($this->once())
-            ->method('update')
-            ->with($id, $requestData)
-            ->willReturn(['success' => false, 'errors' => ['Invalid data']]);
-
-        $response = $this->controller->update($requestMock, $id);
+        $response = $this->controller->delete($request, 1);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['Invalid data'], json_decode($response->getBody(), true));
-        $this->assertEquals(422, $response->getStatusCode());
-    }
-
-    public function testDeleteSuccess(): void
-    {
-        $id = 1;
-
-        $this->studentMock->expects($this->once())
-            ->method('delete')
-            ->with($id)
-            ->willReturn(['success' => true]);
-
-        $response = $this->controller->delete($id);
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals([], json_decode($response->getBody(), true));
         $this->assertEquals(201, $response->getStatusCode());
+        $this->assertEquals([], $response->getPayload());
     }
 
-    public function testDeleteFailure(): void
+    public function testDeleteReturns422OnError(): void
     {
-        $id = 1;
+        $request = $this->createMock(Request::class);
+        $this->studentOperationsMock->method('delete')->with(1)->willReturn([
+            'success' => false,
+            'errors' => ['message' => 'Cannot delete student with enrollments'],
+        ]);
 
-        $this->studentMock->expects($this->once())
-            ->method('delete')
-            ->with($id)
-            ->willReturn(['success' => false, 'errors' => ['Not found']]);
-
-        $response = $this->controller->delete($id);
+        $response = $this->controller->delete($request, 1);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['Not found'], json_decode($response->getBody(), true));
         $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(['message' => 'Cannot delete student with enrollments'], $response->getPayload());
+    }
+
+    public function testUpdateReturns422WhenValidationFails(): void
+    {
+        $data = [
+            'id' => 1,
+            'name' => '',
+            'cpf' => 'invalid',
+            'email' => 'invalid',
+            'birthdate' => 'invalid',
+        ];
+
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($data));
+
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $this->studentOperationsMock->expects($this->never())->method('update');
+
+        $response = $this->controller->update($request, 1);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertArrayHasKey('error', $response->getPayload());
+    }
+
+    public function testUpdateReturns500OnJsonException(): void
+    {
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn('invalid-json');
+
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $response = $this->controller->update($request, 1);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertArrayHasKey('Error', $response->getPayload());
+    }
+
+    public function testUpdateReturns500OnOtherException(): void
+    {
+        $data = [
+            'id' => 1,
+            'name' => 'John Doe',
+            'cpf' => '123.456.789-09',
+            'email' => 'john@example.com',
+            'birthdate' => '1990-01-01',
+        ];
+
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('getContents')->willReturn(json_encode($data));
+
+        $request = $this->createMock(Request::class);
+        $request->method('getBody')->willReturn($stream);
+
+        $this->studentOperationsMock->method('update')->willThrowException(new \Exception('Database error'));
+
+        $response = $this->controller->update($request, 1);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertEquals(['Error' => 'Database error'], $response->getPayload());
     }
 }

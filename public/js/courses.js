@@ -13,12 +13,10 @@ function loadCourses(page = 1) {
         </tr>
     `;
 
-    const token = localStorage.getItem('token');
     const url = `/api/courses?page=${page}`;
 
-    fetch(url, {
+    fetchWithTokenRefresh(url, {
         headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
     })
@@ -132,10 +130,8 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchCourse(id) {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`/api/courses/${id}`, {
+    const response = await fetchWithTokenRefresh(`/api/courses/${id}`, {
         headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
     });
@@ -156,6 +152,7 @@ function configureModal() {
 
         const form = document.getElementById('classForm');
         form.addEventListener('submit', handleSubmit);
+        setupFormFieldValidation(form);
 
         const trigger = event.relatedTarget;
         const action = trigger?.dataset.action || 'create';
@@ -175,37 +172,33 @@ function configureModal() {
 }
 
 async function fetchForm() {
-    const token = localStorage.getItem('token');
-    const response = await fetch('/courses/form', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
+    const response = await fetchWithTokenRefresh('/courses/form');
     return response.text();
 }
 
 async function handleSubmit(e) {
     e.preventDefault();
 
-    const token = localStorage.getItem('token');
     const form = e.target;
     const formData = new FormData(form);
     const method = form.dataset.action === 'edit' ? 'PUT' : 'POST';
     const url = `/api/courses${form.dataset.action === 'edit' ? '/' + formData.get('id') : ''}`;
 
-    resetFormValidation(form);
-
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
+        form.querySelectorAll(':invalid').forEach(input => {
+            input.classList.add('is-invalid');
+        });
         return;
     }
 
+    resetFormValidation(form);
+
     try {
-        const response = await fetch(url, {
+        const response = await fetchWithTokenRefresh(url, {
             method,
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(Object.fromEntries(formData))
         });
@@ -224,15 +217,12 @@ async function handleSubmit(e) {
 }
 
 async function deleteCourse(id) {
-    const token = localStorage.getItem('token');
-
     if (!confirm("Tem certeza que deseja excluir esta turma?")) return;
 
     try {
-        const response = await fetch(`/api/courses/${id}`, {
+        const response = await fetchWithTokenRefresh(`/api/courses/${id}`, {
             method: "DELETE",
             headers: {
-                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -261,5 +251,3 @@ async function deleteCourse(id) {
         alert('Erro inesperado. Verifique sua conexão e tente novamente.');
     }
 }
-
-

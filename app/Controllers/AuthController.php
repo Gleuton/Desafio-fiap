@@ -2,16 +2,14 @@
 
 namespace FiapAdmin\Controllers;
 
-use FiapAdmin\Models\Admin\Admin;
-use FiapAdmin\Repositories\TokenRepository;
-use Firebase\JWT\JWT;
+use FiapAdmin\Models\Admin\AuthService;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 
 readonly class AuthController
 {
-    public function __construct(private Admin $admin, private TokenRepository $tokenRepository)
+    public function __construct(private AuthService $authService)
     {
     }
 
@@ -19,13 +17,18 @@ readonly class AuthController
     {
         $headers = $request->getHeaders();
         $token = $headers['authorization'][0] ?? '';
-        $payload = $this->admin->isTokenValid($token);
+        $payload = $this->authService->validateToken($token);
 
         if (!$payload) {
             return new JsonResponse(['error' => 'Token inválido ou sem permissão'], 401);
         }
 
-        return new JsonResponse(['valid' => true], 200);
+        $adminId = $payload['admin_id'] ?? null;
+        if (!$adminId) {
+            return new JsonResponse(['error' => 'Token inválido ou sem permissão'], 401);
+        }
+
+        return new JsonResponse($token, 200);
     }
 
     public function login(ServerRequestInterface $request): Response
@@ -40,14 +43,33 @@ readonly class AuthController
             return new JsonResponse(['error' => 'E-mail e senha são obrigatórios'], 400);
         }
 
-        $admin = $this->admin->authenticate($email, $password);
+        $admin = $this->authService->authenticate($email, $password);
 
         if (!$admin) {
             return new JsonResponse(['error' => 'Credenciais inválidas'], 401);
         }
 
+        return new JsonResponse($this->authService->generateToken($admin), 200);
+    }
 
-        return new JsonResponse(['token' => $this->newToken($admin)], 200);
+    public function refresh(ServerRequestInterface $request): Response
+    {
+        $body = $request->getBody();
+        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $refreshToken = $data['refresh_token'] ?? '';
+
+        if (empty($refreshToken)) {
+            return new JsonResponse(['error' => 'Refresh token é obrigatório'], 400);
+        }
+
+        $tokens = $this->authService->refreshToken($refreshToken);
+
+        if (!$tokens) {
+            return new JsonResponse(['error' => 'Refresh token inválido ou expirado'], 401);
+        }
+
+        return new JsonResponse($tokens, 200);
     }
 
     public function logout(ServerRequestInterface $request): Response
@@ -55,47 +77,12 @@ readonly class AuthController
         $headers = $request->getHeaders();
         $authHeader = $headers['authorization'][0] ?? '';
 
-        if (empty($authHeader) || !str_starts_with($authHeader, 'Bearer ')) {
-            return new JsonResponse(['error' => 'Token não fornecido'], 401);
-        }
+        $success = $this->authService->logout($authHeader);
 
-        $token = str_replace('Bearer ', '', $authHeader);
-
-        $found = $this->tokenRepository->findByToken($token);
-
-        if (!$found || $found['revoked']) {
+        if (!$success) {
             return new JsonResponse(['error' => 'Token inválido ou já revogado'], 401);
         }
 
-        $userId = $found['user_id'];
-        $this->tokenRepository->revokeAllForUser((int) $userId);
-
         return new JsonResponse(['message' => 'Logout realizado com sucesso'], 200);
-    }
-
-    private function newToken(array $admin): string
-    {
-        $secretKey = $this->admin->getSecretKey();
-
-        $this->tokenRepository->revokeAllForUser($admin['id']);
-
-        $payload = [
-            'admin_id' => $admin['id'],
-            'exp' => time() + (60 * 60),
-            'role' => $admin['role'],
-        ];
-
-
-        $token = JWT::encode($payload, $secretKey, 'HS256');
-        $refreshToken = bin2hex(random_bytes(32));
-
-        $this->tokenRepository->create(
-            $admin['id'],
-            $token,
-            $refreshToken,
-            date('Y-m-d H:i:s', $payload['exp'])
-        );
-
-        return $token;
     }
 }

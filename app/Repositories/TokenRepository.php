@@ -22,6 +22,14 @@ class TokenRepository extends Repository
         return $this->findBy($sql, $params);
     }
 
+    public function findByRefreshToken(string $refreshToken): ?array
+    {
+        $params = ['refresh_token' => $refreshToken];
+        $sql = 'WHERE refresh_token = :refresh_token AND revoked = 0 LIMIT 1';
+
+        return $this->findBy($sql, $params);
+    }
+
     public function revokeAllForUser(int $userId): bool
     {
         $sql = 'UPDATE tokens SET revoked = true WHERE user_id = :user_id';

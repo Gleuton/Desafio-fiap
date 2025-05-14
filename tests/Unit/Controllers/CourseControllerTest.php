@@ -2,137 +2,166 @@
 
 namespace Tests\Unit\Controllers;
 
-
 use FiapAdmin\Controllers\CourseController;
+use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Course\Course;
+use FiapAdmin\Models\Course\CourseService;
 use Laminas\Diactoros\Response\JsonResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\StreamInterface;
 
 class CourseControllerTest extends TestCase
 {
-    private Course|MockObject $courseMock;
-    private CourseController|MockObject $controller;
+    private MockObject|CourseService $courseMock;
+    private CourseController $controller;
 
     protected function setUp(): void
     {
-        $this->courseMock = $this->createMock(Course::class);
-        $this->controller = new CourseController();
-        $this->setPrivateProperty($this->controller, 'course', $this->courseMock);
+        $this->courseMock = $this->createMock(CourseService::class);
+        $this->controller = new CourseController($this->courseMock);
     }
 
-    private function setPrivateProperty($object, $property, $value): void
+
+    public function testIndexReturnsPaginatedData(): void
     {
-        $reflection = new \ReflectionClass($object);
-        $reflectionProperty = $reflection->getProperty($property);
-        $reflectionProperty->setValue($object, $value);
+        $request = $this->createMock(Request::class);
+        $queryParams = ['page' => 1, 'limit' => 10];
+        $requestData = ['data' => [], 'total' => 0];
+
+        $request->method('getQueryParams')->willReturn($queryParams);
+        $this->courseMock->method('index')->with(1, 10)->willReturn($requestData);
+
+        $response = $this->controller->index($request);
+
+        $this->assertSame($requestData, $response->getPayload());
     }
 
-    public function testIndex(): void
+    public function testCreateReturns201OnSuccess(): void
     {
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getQueryParams')->willReturn(['page' => 2, 'limit' => 5]);
+        $request = $this->createMock(Request::class);
+        $body = $this->createMock(StreamInterface::class);
 
-        $this->courseMock->expects($this->once())
-            ->method('index')
-            ->with(2, 5)
-            ->willReturn(['data' => ['course1', 'course2']]);
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => 'PHP Course',
+            'description' => 'Learn PHP programming with this comprehensive course'
+        ]));
+        $request->method('getBody')->willReturn($body);
 
-        $response = $this->controller->index($requestMock);
+        $this->courseMock->method('create')
+            ->with($this->isInstanceOf(Course::class))
+            ->willReturn([
+                'success' => true,
+                'id' => 1
+            ]);
+
+        $response = $this->controller->create($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['data' => ['course1', 'course2']], json_decode($response->getBody(), true));
-    }
-
-    public function testCreateSuccess(): void
-    {
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-        $streamMock->method('getContents')->willReturn(json_encode(['name' => 'New Course']));
-        $requestMock->method('getBody')->willReturn($streamMock);
-
-        $this->courseMock->expects($this->once())
-            ->method('create')
-            ->with(['name' => 'New Course'])
-            ->willReturn(['success' => true, 'data' => ['id' => 1]]);
-
-        $response = $this->controller->create($requestMock);
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['success' => true, 'data' => ['id' => 1]], json_decode($response->getBody(), true));
         $this->assertEquals(201, $response->getStatusCode());
     }
 
-    public function testCreateFailure(): void
+    public function testCreateReturns422OnValidationFailure(): void
     {
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-        $streamMock->method('getContents')->willReturn(json_encode(['name' => 'Invalid Course']));
-        $requestMock->method('getBody')->willReturn($streamMock);
+        $request = $this->createMock(Request::class);
+        $body = $this->createMock(StreamInterface::class);
 
-        $this->courseMock->expects($this->once())
-            ->method('create')
-            ->with(['name' => 'Invalid Course'])
-            ->willReturn(['success' => false, 'errors' => ['Invalid data']]);
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => '',
+            'description' => 'Test description'
+        ], JSON_THROW_ON_ERROR));
+        $request->method('getBody')->willReturn($body);
 
-        $response = $this->controller->create($requestMock);
+        // Mock ValidationException being thrown when creating the Course
+        $this->courseMock->method('create')
+            ->will($this->throwException(new ValidationException('name', 'Name is required')));
+
+        $response = $this->controller->create($request);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['Invalid data'], json_decode($response->getBody(), true));
         $this->assertEquals(422, $response->getStatusCode());
     }
 
-    public function testShow(): void
+    public function testShowReturnsCourseData(): void
     {
-        $id = '123';
-        $this->courseMock->expects($this->once())
-            ->method('findById')
-            ->with($id)
-            ->willReturn(['id' => $id, 'name' => 'Course Name']);
+        $request = $this->createMock(Request::class);
+        $courseData = ['id' => 1, 'name' => 'PHP Course'];
 
-        $response = $this->controller->show($id);
+        $this->courseMock->method('findById')->with(1)->willReturn($courseData);
+
+        $response = $this->controller->show($request, 1);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['id' => $id, 'name' => 'Course Name'], json_decode($response->getBody(), true));
+        $this->assertSame($courseData, $response->getPayload());
     }
 
-    public function testDeleteSuccess(): void
+    public function testDeleteReturns201OnSuccess(): void
     {
-        $id = 1;
+        $request = $this->createMock(Request::class);
 
-        $this->courseMock->expects($this->once())
-            ->method('delete')
-            ->with($id)
-            ->willReturn(['success' => true]);
+        $this->courseMock->method('delete')->with(1)->willReturn([
+            'success' => true
+        ]);
 
-        $response = $this->controller->delete($id);
+        $response = $this->controller->delete($request, 1);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals([], json_decode($response->getBody(), true));
         $this->assertEquals(201, $response->getStatusCode());
     }
 
-    public function testUpdateSuccess(): void
+    public function testDeleteReturns422OnError(): void
     {
-        $id = 1;
-        $requestData = ['name' => 'Updated Course'];
+        $request = $this->createMock(Request::class);
 
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-        $streamMock->method('getContents')->willReturn(json_encode($requestData));
-        $requestMock->method('getBody')->willReturn($streamMock);
+        $this->courseMock->method('delete')->with(1)->willReturn([
+            'success' => false,
+            'errors' => ['message' => 'Cannot delete course in use']
+        ]);
 
-        $this->courseMock->expects($this->once())
-            ->method('update')
-            ->with($id, $requestData)
-            ->willReturn(['success' => true, 'data' => ['id' => $id, 'name' => 'Updated Course']]);
+        $response = $this->controller->delete($request, 1);
 
-        $response = $this->controller->update($requestMock, $id);
+        $this->assertEquals(422, $response->getStatusCode());
+    }
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(['success' => true, 'data' => ['id' => $id, 'name' => 'Updated Course']], json_decode($response->getBody(), true));
+    public function testUpdateReturns201OnSuccess(): void
+    {
+        $request = $this->createMock(Request::class);
+        $body = $this->createMock(StreamInterface::class);
+
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => 'Updated Name',
+            'description' => 'Updated description for the course'
+        ]));
+        $request->method('getBody')->willReturn($body);
+
+        $this->courseMock->method('update')
+            ->with($this->isInstanceOf(Course::class))
+            ->willReturn([
+                'success' => true
+            ]);
+
+        $response = $this->controller->update($request, 1);
+
         $this->assertEquals(201, $response->getStatusCode());
+    }
+
+    public function testUpdateReturns422OnValidationError(): void
+    {
+        $request = $this->createMock(Request::class);
+        $body = $this->createMock(StreamInterface::class);
+
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => '',
+            'description' => 'Test description'
+        ]));
+        $request->method('getBody')->willReturn($body);
+
+        // Mock ValidationException being thrown when creating the Course
+        $this->courseMock->method('update')
+            ->will($this->throwException(new ValidationException('name', 'Name cannot be empty')));
+
+        $response = $this->controller->update($request, 1);
+
+        $this->assertEquals(422, $response->getStatusCode());
     }
 }

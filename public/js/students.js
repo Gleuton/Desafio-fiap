@@ -19,15 +19,20 @@ function loadStudents(searchTerm = "") {
 
     const url = `/api/students${searchTerm ? `?name=${searchTerm}` : ""}`;
 
-    fetch(url, {
+    fetchWithTokenRefresh(url, {
         headers: {
-            'Authorization': `Bearer ${getToken()}`,
             'Content-Type': 'application/json'
         }
     })
         .then(response => response.json())
         .then(students => renderStudents(students, tableBody))
         .catch(error => handleError(error, tableBody));
+}
+
+function formatCpf(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+
+    return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
 }
 
 function renderStudents(students, tableBody) {
@@ -44,7 +49,7 @@ function renderStudents(students, tableBody) {
             <td>${student.id}</td>
             <td>${student.name}</td>
             <td>${formatBirthdate(student.birthdate)}</td>
-            <td>${student.cpf}</td>
+            <td>${formatCpf(student.cpf)}</td>
             <td>${student.email}</td>
             <td>
                 <button 
@@ -91,6 +96,21 @@ function configureModal() {
 
         const form = document.getElementById('studentForm');
         form.addEventListener('submit', handleSubmit);
+        setupFormFieldValidation(form);
+
+        const cpfInput = form.querySelector('#cpf');
+        if (cpfInput) {
+            cpfInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 11) {
+                    value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+                    value = value.replace(/^(\d{3})(\d{3})(\d{3})$/, '$1.$2.$3');
+                    value = value.replace(/^(\d{3})(\d{3})$/, '$1.$2');
+                    value = value.replace(/^(\d{3})$/, '$1');
+                }
+                e.target.value = value;
+            });
+        }
 
         const trigger = event.relatedTarget;
         const action = trigger?.dataset.action || 'create';
@@ -110,7 +130,7 @@ function configureModal() {
 }
 
 async function fetchForm() {
-    const response = await fetch('/students/form');
+    const response = await fetchWithTokenRefresh('/students/form');
     return response.text();
 }
 
@@ -127,9 +147,8 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchStudent(id) {
-    const response = await fetch(`/api/students/${id}`, {
+    const response = await fetchWithTokenRefresh(`/api/students/${id}`, {
         headers: {
-            'Authorization': `Bearer ${getToken()}`,
             'Content-Type': 'application/json'
         }
     });
@@ -140,7 +159,7 @@ function populateForm(data, form) {
     form.querySelector('#studentId').value = data.id;
     form.querySelector('#name').value = data.name;
     form.querySelector('#birthdate').value = data.birthdate;
-    form.querySelector('#cpf').value = data.cpf;
+    form.querySelector('#cpf').value = formatCpf(data.cpf);
     form.querySelector('#email').value = data.email;
     form.querySelector('#password').value = '';
 }
@@ -153,19 +172,21 @@ async function handleSubmit(e) {
     const method = form.dataset.action === 'edit' ? 'PUT' : 'POST';
     const url = `/api/students${form.dataset.action === 'edit' ? '/' + formData.get('id') : ''}`;
 
-    resetFormValidation(form);
-
     if (!form.checkValidity()) {
         form.classList.add('was-validated');
+        form.querySelectorAll(':invalid').forEach(input => {
+            input.classList.add('is-invalid');
+        });
         return;
     }
 
+    resetFormValidation(form);
+
     try {
-        const response = await fetch(url, {
+        const response = await fetchWithTokenRefresh(url, {
             method,
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(Object.fromEntries(formData))
         });
@@ -187,10 +208,9 @@ async function deleteStudent(id) {
     if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
 
     try {
-        const response = await fetch(`/api/students/${id}`, {
+        const response = await fetchWithTokenRefresh(`/api/students/${id}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${getToken()}`,
                 'Content-Type': 'application/json'
             }
         });

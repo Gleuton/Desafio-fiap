@@ -2,6 +2,10 @@
 
 namespace FiapAdmin\Repositories;
 
+use Core\DataBase\BuilderInterface;
+use FiapAdmin\Exceptions\ValidationException;
+use FiapAdmin\Models\Student\Student;
+
 class StudentRepository extends Repository
 {
     protected string $table = 'users';
@@ -13,6 +17,11 @@ class StudentRepository extends Repository
         'password',
         'role_id'
     ];
+
+    public function __construct(BuilderInterface $builder, private RoleRepository $roleRepository)
+    {
+        parent::__construct($builder);
+    }
 
     public function findAll(): array
     {
@@ -30,16 +39,43 @@ class StudentRepository extends Repository
         return $this->query($sql);
     }
 
-    public function saveStudent(array $data): array
+    /**
+     * @throws ValidationException
+     */
+    public function saveStudent(Student $student): array
     {
+        $data = $this->mapStudentToArray($student);
+
+        if ($this->cpfExists($data['cpf'])) {
+            throw new ValidationException('cpf', 'CPF já cadastrado');
+        }
+
+        if ($this->emailExists($data['email'])) {
+            throw new ValidationException('email', 'E-mail já cadastrado');
+        }
+
         $newId = $this->insert($data);
         return $this->findById($newId);
     }
 
-    public function updateStudent(int $id, array $data): array
+    /**
+     * @throws ValidationException
+     */
+    public function updateStudent(Student $student): array
     {
-        $newId = $this->update($id, $data);
-        return $this->findById($newId);
+        $id = $student->id();
+        $data = $this->mapStudentToArray($student);
+
+        if ($this->cpfExists($data['cpf'], $id)) {
+            throw new ValidationException('cpf', 'CPF já cadastrado');
+        }
+
+        if ($this->emailExists($data['email'], $id)) {
+            throw new ValidationException('email', 'E-mail já cadastrado');
+        }
+
+        $this->update($id, $data);
+        return $this->findById($id);
     }
 
     public function cpfExists(string $cpf, ?int $excludeId = null): bool
@@ -116,5 +152,22 @@ class StudentRepository extends Repository
         }
 
         return $this->query($sql, $params);
+    }
+
+    /**
+     * @param Student $student
+     * @return array
+     */
+    public function mapStudentToArray(Student $student): array
+    {
+        $roleId = $this->roleRepository->roleId(Student::ROLE);
+        return [
+            'name' => $student->name(),
+            'birthdate' => $student->birthdate(),
+            'cpf' => $student->cpf(),
+            'email' => $student->email(),
+            'password' => $student->password(),
+            'role_id' => $roleId,
+        ];
     }
 }

@@ -2,11 +2,48 @@
 
 namespace FiapAdmin\Repositories;
 
+use FiapAdmin\Exceptions\ValidationException;
+
 class EnrollmentRepository extends Repository
 {
     protected string $table = 'enrollments';
 
     protected array $fillable = ['user_id', 'course_id'];
+
+    public function findOneById(int $id): ?array
+    {
+        return $this->findById($id);
+    }
+
+    public function findPaginated(int $page, int $limit): array
+    {
+        $offset = ($page - 1) * $limit;
+
+        $sql = "SELECT 
+                    e.id, 
+                    e.user_id,
+                    e.course_id,
+                    u.name AS student_name,
+                    c.name AS course_name
+                FROM $this->table e
+                INNER JOIN courses c ON c.id = e.course_id
+                INNER JOIN users u ON u.id = e.user_id
+                ORDER BY e.id 
+                LIMIT $limit OFFSET $offset";
+
+        return $this->query($sql);
+    }
+
+    public function countTotal(): int
+    {
+        $sql = "SELECT COUNT(*) total
+            FROM $this->table";
+
+        return $this->query($sql)[0]['total'];
+    }
+    /**
+     * @throws ValidationException
+     */
     public function isEnrolled(int $studentId, int $courseId): bool
     {
         $sql = "SELECT * FROM $this->table 
@@ -18,11 +55,19 @@ class EnrollmentRepository extends Repository
         ];
 
         $result = $this->query($sql, $params);
-        return !empty($result);
+
+        if (!empty($result)) {
+            throw new ValidationException('enrollment', 'Este aluno já está matriculado nesta turma!');
+        }
+        return false;
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function saveEnrollment(array $data): array
     {
+        $this->isEnrolled($data['user_id'], $data['course_id']);
         $newId = $this->insert($data);
         return $this->findById($newId);
     }
@@ -41,5 +86,14 @@ class EnrollmentRepository extends Repository
         ];
 
         return $this->query($sql, $params);
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function updateEnrollment(int $id, array $data): bool
+    {
+        $this->isEnrolled($data['user_id'], $data['course_id']);
+        return $this->update($id, $data);
     }
 }

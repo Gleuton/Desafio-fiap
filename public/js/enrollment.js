@@ -9,11 +9,7 @@ function getToken() {
 
 async function fetchEnrollmentForm() {
     try {
-        const response = await fetch('/enrollments/form', {
-            headers: {
-                'Authorization': `Bearer ${getToken()}`
-            }
-        });
+        const response = await fetchWithTokenRefresh('/enrollments/form');
         return await response.text();
     } catch (error) {
         console.error('Erro ao carregar formulário:', error);
@@ -32,11 +28,7 @@ async function initializeAutocomplete() {
         if (!searchTerm) return;
 
         try {
-            const response = await fetch(`/api/students?name=${encodeURIComponent(searchTerm)}&limit=10`, {
-                headers: {
-                    'Authorization': `Bearer ${getToken()}`
-                }
-            });
+            const response = await fetchWithTokenRefresh(`/api/students?name=${encodeURIComponent(searchTerm)}&limit=10`);
             const students = await response.json();
 
             list.innerHTML = '';
@@ -82,11 +74,10 @@ async function submitEnrollment() {
     }
 
     try {
-        const response = await fetch('/api/enrollments', {
+        const response = await fetchWithTokenRefresh('/api/enrollments', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ course_id: courseId, user_id: studentId })
         });
@@ -101,14 +92,14 @@ async function submitEnrollment() {
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('enrollmentModal'));
                 modal.hide();
-                loadCourses(); // função global
+                loadCourses();
             }, 250);
         } else {
             const errorData = await response.json();
             if (messageBox) {
                 messageBox.classList.remove('d-none');
                 messageBox.classList.add('alert', 'alert-danger');
-                const messages = Object.values(errorData).join(' ');
+                const messages = Object.values(errorData.error).join(' ');
                 messageBox.textContent = messages || 'Erro ao realizar matrícula.';
             }
         }
@@ -147,7 +138,7 @@ function configureEnrollmentModal(modalElement) {
             }
         }
 
-        initializeAutocomplete();
+        await initializeAutocomplete();
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();

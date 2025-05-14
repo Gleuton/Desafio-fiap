@@ -2,79 +2,53 @@
 
 namespace FiapAdmin\Models\Student;
 
-use FiapAdmin\Repositories\RoleRepository;
-use FiapAdmin\Repositories\StudentRepository;
+use DateTime;
+use FiapAdmin\Models\Cpf;
+use FiapAdmin\Models\Email;
+use FiapAdmin\Models\Name;
+use FiapAdmin\Models\Password;
 
 readonly class Student
 {
+    public const string ROLE = 'student';
+
     public function __construct(
-        private StudentRepository $repository,
-        private StudentValidator $validator,
-        private RoleRepository $roleRepository
+        private ?int $id,
+        private Name $name,
+        private Cpf $cpf,
+        private Email $email,
+        private DateTime $birthdate,
+        private ?Password $password,
     ) {
     }
 
-    public function findById(int $id): array
+    public function id(): ?int
     {
-        return $this->repository->findOneById($id);
+        return $this->id;
     }
 
-    public function all(?string $name, ?int $limit): ?array
+    public function name(): string
     {
-        if ($name === null) {
-            return $this->repository->findAll();
-        }
-        return $this->repository->findAllByName($name, $limit);
+        return $this->name->value();
     }
 
-    public function create(array $data): array
+    public function cpf(): string
     {
-        $validation = $this->validator->validateCreate($data);
-
-        if (!empty($validation)) {
-            return ['success' => false, 'errors' => $validation];
-        }
-
-        $data['role_id'] = $this->roleRepository->roleId('student');
-
-        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
-
-        return [
-            'success' => $this->repository->saveStudent($data),
-            'data' => $data
-        ];
+        return $this->cpf->value();
     }
 
-    public function update(?int $id, array $data): array
+    public function email(): string
     {
-        $validation = $this->validator->validateUpdate($id, $data);
-        if (!empty($validation)) {
-            return ['success' => false, 'errors' => $validation];
-        }
-
-        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
-
-        return [
-            'success' => $this->repository->updateStudent($id, $data),
-            'data' => $data
-        ];
+        return $this->email->value();
     }
 
-    public function delete(int $id): array
+    public function birthdate(): string
     {
-        $errors = [];
+        return $this->birthdate->format('Y-m-d');
+    }
 
-        if ($this->repository->hasEnrollments($id)) {
-            $errors['enrollment'] = 'Aluno possui matrículas ativas e não pode ser excluído';
-        }
-
-        if (!empty($errors)) {
-            return ['success' => false, 'errors' => $errors];
-        }
-
-        return [
-            'success' => $this->repository->delete($id),
-            'id' => $id
-        ];
+    public function password(): ?string
+    {
+        return $this->password?->value();
     }
 }

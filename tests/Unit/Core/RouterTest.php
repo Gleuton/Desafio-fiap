@@ -11,6 +11,7 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\Uri;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use stdClass;
 
@@ -18,11 +19,13 @@ class RouterTest extends TestCase
 {
     private RouteDispatcher $router;
     private ServerRequestInterface $request;
+    private ContainerInterface $container;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->router = new RouteDispatcher();
+        $this->container = $this->createMock(ContainerInterface::class);
+        $this->router = new RouteDispatcher($this->container);
 
         $serverParams = [
             'REQUEST_METHOD' => 'GET',

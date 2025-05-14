@@ -4,9 +4,8 @@
         <div class="modal-body">
             <div class="mb-3">
                 <label for="name" class="form-label">Nome *</label>
-                <input type="text" class="form-control" id="name" name="name"
-                       minlength="3" required>
-                <div class="invalid-feedback">Mínimo 3 caracteres</div>
+                <input type="text" class="form-control" id="name" name="name" minlength="3" required>
+                <div class="invalid-feedback">Nome da turma deve ter no mínimo 3 caracteres</div>
             </div>
 
             <div class="mb-3">
@@ -17,15 +16,15 @@
 
             <div class="mb-3">
                 <label for="cpf" class="form-label">CPF *</label>
-                <input type="text" class="form-control" id="cpf" name="cpf"
+                <input type="text" class="form-control" id="cpf" name="cpf" maxlength="14"
                        pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" required>
-                <div class="invalid-feedback">CPF inválido ou já cadastrado</div>
+                <div class="invalid-feedback">CPF inválido</div>
             </div>
 
             <div class="mb-3">
                 <label for="email" class="form-label">E-mail *</label>
                 <input type="email" class="form-control" id="email" name="email" required>
-                <div class="invalid-feedback">E-mail inválido ou já cadastrado</div>
+                <div class="invalid-feedback">E-mail inválido</div>
             </div>
 
             <div class="mb-3">
@@ -40,5 +39,3 @@
         </div>
     </div>
 </form>
-
-

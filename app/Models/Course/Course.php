@@ -2,73 +2,27 @@
 
 namespace FiapAdmin\Models\Course;
 
-use FiapAdmin\Repositories\CourseRepository;
+use FiapAdmin\Models\Description;
+use FiapAdmin\Models\Name;
 
 readonly class Course
 {
-    public function __construct(private CourseRepository $repository, private CourseValidator $validator)
+    public function __construct(private ?int $id,private Name $name, private Description $description)
     {
     }
 
-    public function index(int $page, int $limit): array
+    public function id(): int
     {
-        $total = $this->repository->countTotal();
-        $totalPages = ceil($total / $limit);
-
-        $courses = $this->repository->findPaginated($page, $limit);
-
-        return [
-            'courses' => $courses,
-            'totalPages' => $totalPages,
-            'currentPage' => $page
-        ];
+        return $this->id;
     }
 
-    public function create(array $data): array
+    public function name(): Name
     {
-        $validation = $this->validator->validateCreate($data);
-        if (!empty($validation)) {
-            return ['success' => false, 'errors' => $validation];
-        }
-
-        return [
-            'success' => $this->repository->saveCourse($data),
-            'data' => $data
-        ];
+        return $this->name;
     }
 
-    public function findById(int $id): array
+    public function description(): Description
     {
-        return $this->repository->findOneById($id);
-    }
-
-    public function update(?int $id, array $data): array
-    {
-        $validation = $this->validator->validateUpdate($id, $data);
-        if (!empty($validation)) {
-            return ['success' => false, 'errors' => $validation];
-        }
-
-        return [
-            'success' => $this->repository->updateCourse($id, $data),
-            'data' => $data
-        ];
-    }
-
-    public function delete(int $id): array {
-        $errors = [];
-
-        if ($this->repository->hasEnrollments($id)) {
-            $errors['enrollment'] = 'Turma possui alunos matriculados e não pode ser excluído';
-        }
-
-        if (!empty($errors)) {
-            return ['success' => false, 'errors' => $errors];
-        }
-
-        return [
-            'success' => $this->repository->delete($id),
-            'id' => $id
-        ];
+        return $this->description;
     }
 }
