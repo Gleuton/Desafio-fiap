@@ -8,14 +8,9 @@ studentListModal.addEventListener('show.bs.modal', function (event) {
 async function deleteEnrollment(enrollmentId, courseId) {
     if (!confirm('Tem certeza que deseja remover esta matrícula?')) return;
 
-    const token = localStorage.getItem('token');
-
     try {
-        const response = await fetch(`/api/enrollments/${enrollmentId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        const response = await fetchWithTokenRefresh(`/api/enrollments/${enrollmentId}`, {
+            method: 'DELETE'
         });
 
         if (response.ok) {
@@ -37,18 +32,13 @@ async function loadStudentList(courseId) {
     const list = document.getElementById('studentListContent');
     list.innerHTML = '<li class="list-group-item">Carregando...</li>';
 
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!localStorage.getItem('token') && !localStorage.getItem('refresh_token')) {
         list.innerHTML = '<li class="list-group-item text-danger">Token não encontrado.</li>';
         return;
     }
 
     try {
-        const response = await fetch(`/api/courses/${courseId}/enrollments`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const response = await fetchWithTokenRefresh(`/api/courses/${courseId}/enrollments`);
 
         const enrollments = await response.json();
 

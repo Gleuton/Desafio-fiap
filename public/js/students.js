@@ -19,9 +19,8 @@ function loadStudents(searchTerm = "") {
 
     const url = `/api/students${searchTerm ? `?name=${searchTerm}` : ""}`;
 
-    fetch(url, {
+    fetchWithTokenRefresh(url, {
         headers: {
-            'Authorization': `Bearer ${getToken()}`,
             'Content-Type': 'application/json'
         }
     })
@@ -110,7 +109,7 @@ function configureModal() {
 }
 
 async function fetchForm() {
-    const response = await fetch('/students/form');
+    const response = await fetchWithTokenRefresh('/students/form');
     return response.text();
 }
 
@@ -127,9 +126,8 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchStudent(id) {
-    const response = await fetch(`/api/students/${id}`, {
+    const response = await fetchWithTokenRefresh(`/api/students/${id}`, {
         headers: {
-            'Authorization': `Bearer ${getToken()}`,
             'Content-Type': 'application/json'
         }
     });
@@ -161,11 +159,10 @@ async function handleSubmit(e) {
     }
 
     try {
-        const response = await fetch(url, {
+        const response = await fetchWithTokenRefresh(url, {
             method,
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(Object.fromEntries(formData))
         });
@@ -187,10 +184,9 @@ async function deleteStudent(id) {
     if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
 
     try {
-        const response = await fetch(`/api/students/${id}`, {
+        const response = await fetchWithTokenRefresh(`/api/students/${id}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${getToken()}`,
                 'Content-Type': 'application/json'
             }
         });

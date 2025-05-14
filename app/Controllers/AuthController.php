@@ -23,7 +23,12 @@ readonly class AuthController
             return new JsonResponse(['error' => 'Token inválido ou sem permissão'], 401);
         }
 
-        return new JsonResponse(['valid' => true], 200);
+        $adminId = $payload['admin_id'] ?? null;
+        if (!$adminId) {
+            return new JsonResponse(['error' => 'Token inválido ou sem permissão'], 401);
+        }
+
+        return new JsonResponse($token, 200);
     }
 
     public function login(ServerRequestInterface $request): Response
@@ -44,7 +49,27 @@ readonly class AuthController
             return new JsonResponse(['error' => 'Credenciais inválidas'], 401);
         }
 
-        return new JsonResponse(['token' => $this->authService->generateToken($admin)], 200);
+        return new JsonResponse($this->authService->generateToken($admin), 200);
+    }
+
+    public function refresh(ServerRequestInterface $request): Response
+    {
+        $body = $request->getBody();
+        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $refreshToken = $data['refresh_token'] ?? '';
+
+        if (empty($refreshToken)) {
+            return new JsonResponse(['error' => 'Refresh token é obrigatório'], 400);
+        }
+
+        $tokens = $this->authService->refreshToken($refreshToken);
+
+        if (!$tokens) {
+            return new JsonResponse(['error' => 'Refresh token inválido ou expirado'], 401);
+        }
+
+        return new JsonResponse($tokens, 200);
     }
 
     public function logout(ServerRequestInterface $request): Response

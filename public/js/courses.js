@@ -13,12 +13,10 @@ function loadCourses(page = 1) {
         </tr>
     `;
 
-    const token = localStorage.getItem('token');
     const url = `/api/courses?page=${page}`;
 
-    fetch(url, {
+    fetchWithTokenRefresh(url, {
         headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
     })
@@ -132,10 +130,8 @@ function prepareModal(action, id = null) {
 }
 
 async function fetchCourse(id) {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`/api/courses/${id}`, {
+    const response = await fetchWithTokenRefresh(`/api/courses/${id}`, {
         headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
     });
@@ -175,19 +171,13 @@ function configureModal() {
 }
 
 async function fetchForm() {
-    const token = localStorage.getItem('token');
-    const response = await fetch('/courses/form', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
+    const response = await fetchWithTokenRefresh('/courses/form');
     return response.text();
 }
 
 async function handleSubmit(e) {
     e.preventDefault();
 
-    const token = localStorage.getItem('token');
     const form = e.target;
     const formData = new FormData(form);
     const method = form.dataset.action === 'edit' ? 'PUT' : 'POST';
@@ -201,11 +191,10 @@ async function handleSubmit(e) {
     }
 
     try {
-        const response = await fetch(url, {
+        const response = await fetchWithTokenRefresh(url, {
             method,
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(Object.fromEntries(formData))
         });
@@ -224,15 +213,12 @@ async function handleSubmit(e) {
 }
 
 async function deleteCourse(id) {
-    const token = localStorage.getItem('token');
-
     if (!confirm("Tem certeza que deseja excluir esta turma?")) return;
 
     try {
-        const response = await fetch(`/api/courses/${id}`, {
+        const response = await fetchWithTokenRefresh(`/api/courses/${id}`, {
             method: "DELETE",
             headers: {
-                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -261,5 +247,3 @@ async function deleteCourse(id) {
         alert('Erro inesperado. Verifique sua conexão e tente novamente.');
     }
 }
-
-

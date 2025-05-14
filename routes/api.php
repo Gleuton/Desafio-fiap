@@ -28,6 +28,6 @@ $router->delete('/api/enrollments/(\d+)', [EnrollmentsController::class, 'delete
 $router->get('/api/courses/(\d+)/enrollments', [EnrollmentsController::class, 'listByCurses'], [AuthMiddleware::class]);
 
 $router->post('/api/login', [AuthController::class, 'login']);
-$router->get('/api/auth/check', [AuthController::class, 'check']);
+$router->post('/api/refresh', [AuthController::class, 'refresh']);
+$router->get('/api/auth/check', [AuthController::class, 'check'], [AuthMiddleware::class]);
 $router->post('/api/logout', [AuthController::class, 'logout']);
-

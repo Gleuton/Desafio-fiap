@@ -47,7 +47,7 @@ readonly class AuthService
         return true;
     }
 
-    public function generateToken(array $admin): string
+    public function generateToken(array $admin): array
     {
         $secretKey = $this->admin->getSecretKey();
 
@@ -69,6 +69,29 @@ readonly class AuthService
             date('Y-m-d H:i:s', $payload['exp'])
         );
 
-        return $token;
+        return [
+            'token' => $token,
+            'refresh_token' => $refreshToken
+        ];
+    }
+
+    public function refreshToken(string $refreshToken): ?array
+    {
+        if (empty($refreshToken)) {
+            return null;
+        }
+
+        $tokenData = $this->tokenRepository->findByRefreshToken($refreshToken);
+
+        if (!$tokenData) {
+            return null;
+        }
+
+        $admin = [
+            'id' => $tokenData['user_id'],
+            'role' => 'admin'
+        ];
+
+        return $this->generateToken($admin);
     }
 }
