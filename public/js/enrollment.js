@@ -99,7 +99,7 @@ async function submitEnrollment() {
             if (messageBox) {
                 messageBox.classList.remove('d-none');
                 messageBox.classList.add('alert', 'alert-danger');
-                const messages = Object.values(errorData).join(' ');
+                const messages = Object.values(errorData.error).join(' ');
                 messageBox.textContent = messages || 'Erro ao realizar matrícula.';
             }
         }

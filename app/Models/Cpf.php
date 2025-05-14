@@ -22,7 +22,7 @@ readonly class Cpf
 
     public function value(): string
     {
-        return $this->cpf;
+        return $this->sanitizeCpf();
     }
 
     private function isValid(): bool

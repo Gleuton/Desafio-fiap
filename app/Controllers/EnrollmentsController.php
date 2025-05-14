@@ -17,9 +17,6 @@ readonly class EnrollmentsController
     {
     }
 
-    /**
-     * @throws ValidationException
-     */
     private function createEnrollment(array $data, ?int $id = null): Enrollment
     {
         $userId = $data['user_id'] ?? $data['student_id'] ?? 0;
@@ -36,9 +33,7 @@ readonly class EnrollmentsController
         return new JsonResponse($this->enrollmentService->index($page, $limit));
     }
 
-    /**
-     * @throws JsonException
-     */
+
     public function create(Request $request): Response
     {
         try {
@@ -51,12 +46,12 @@ readonly class EnrollmentsController
             return new JsonResponse($result, 201);
         } catch (ValidationException $e) {
             return new JsonResponse(
-                ['errors' => [$e->getField() => $e->getMessage()]],
+                ['error' => [$e->getField() => $e->getMessage()]],
                 422
             );
         } catch (Exception $e) {
             return new JsonResponse(
-                ['Error' => $e->getMessage()],
+                ['error' => $e->getMessage()],
                 500
             );
         }

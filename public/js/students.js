@@ -29,6 +29,12 @@ function loadStudents(searchTerm = "") {
         .catch(error => handleError(error, tableBody));
 }
 
+function formatCpf(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+
+    return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+}
+
 function renderStudents(students, tableBody) {
     const formatBirthdate = date => {
         const [year, month, day] = date.split('-');
@@ -43,7 +49,7 @@ function renderStudents(students, tableBody) {
             <td>${student.id}</td>
             <td>${student.name}</td>
             <td>${formatBirthdate(student.birthdate)}</td>
-            <td>${student.cpf}</td>
+            <td>${formatCpf(student.cpf)}</td>
             <td>${student.email}</td>
             <td>
                 <button 
@@ -90,6 +96,20 @@ function configureModal() {
 
         const form = document.getElementById('studentForm');
         form.addEventListener('submit', handleSubmit);
+
+        const cpfInput = form.querySelector('#cpf');
+        if (cpfInput) {
+            cpfInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 11) {
+                    value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+                    value = value.replace(/^(\d{3})(\d{3})(\d{3})$/, '$1.$2.$3');
+                    value = value.replace(/^(\d{3})(\d{3})$/, '$1.$2');
+                    value = value.replace(/^(\d{3})$/, '$1');
+                }
+                e.target.value = value;
+            });
+        }
 
         const trigger = event.relatedTarget;
         const action = trigger?.dataset.action || 'create';
@@ -138,7 +158,7 @@ function populateForm(data, form) {
     form.querySelector('#studentId').value = data.id;
     form.querySelector('#name').value = data.name;
     form.querySelector('#birthdate').value = data.birthdate;
-    form.querySelector('#cpf').value = data.cpf;
+    form.querySelector('#cpf').value = formatCpf(data.cpf);
     form.querySelector('#email').value = data.email;
     form.querySelector('#password').value = '';
 }

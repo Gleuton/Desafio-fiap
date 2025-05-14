@@ -64,25 +64,25 @@ VALUES ('admin'),
 
 -- Admin (senha: Admin@123)
 INSERT INTO users (role_id, name, birthdate, cpf, email, password)
-VALUES (1, 'Administrador FIAP', '1990-01-01', '071.339.530-30', 'admin@fiap.com',
+VALUES (1, 'Administrador FIAP', '1990-01-01', '07133953030', 'admin@fiap.com',
         '$2y$12$XL4ePWi6PbwCPz/LZFCy4OQ5sgxwWGvTgOWKa7m5G6095AmgBThe.');
 
 INSERT INTO users (role_id, name, birthdate, cpf, email, password)
-VALUES (2, 'Ana Souza', '2001-03-15', '403.113.070-86', 'ana.souza@fiap.com', 'senha123'),
-       (2, 'Bruno Lima', '2000-08-21', '693.860.260-31', 'bruno.lima@fiap.com', 'senha123'),
-       (2, 'Carlos Pereira', '1999-07-10', '481.336.770-41', 'carlos.pereira@fiap.com', 'senha123'),
-       (2, 'Daniela Alves', '2002-02-20', '308.164.570-00', 'daniela.alves@fiap.com', 'senha123'),
-       (2, 'Eduardo Ramos', '2003-12-05', '361.358.750-51', 'eduardo.ramos@fiap.com', 'senha123'),
-       (2, 'Fernanda Dias', '1998-04-30', '351.847.980-64', 'fernanda.dias@fiap.com', 'senha123'),
-       (2, 'Gabriel Martins', '2001-06-12', '109.715.080-11', 'gabriel.martins@fiap.com', 'senha123'),
-       (2, 'Helena Costa', '2002-11-18', '369.320.700-30', 'helena.costa@fiap.com', 'senha123'),
-       (2, 'Igor Rocha', '2000-09-03', '917.632.380-32', 'igor.rocha@fiap.com', 'senha123'),
-       (2, 'Juliana Melo', '1999-05-25', '173.975.700-97', 'juliana.melo@fiap.com', 'senha123'),
-       (2, 'Kleber Torres', '2001-01-01', '187.673.800-69', 'kleber.torres@fiap.com', 'senha123'),
-       (2, 'Larissa Campos', '2002-02-02', '132.576.450-74', 'larissa.campos@fiap.com', 'senha123'),
-       (2, 'Marcelo Borges', '2003-03-03', '438.065.500-85', 'marcelo.borges@fiap.com', 'senha123'),
-       (2, 'Natália Farias', '2000-04-04', '809.433.470-33', 'natalia.farias@fiap.com', 'senha123'),
-       (2, 'Otávio Silva', '2001-05-05', '423.646.030-05', 'otavio.silva@fiap.com', 'senha123');
+VALUES (2, 'Ana Souza', '2001-03-15', '40311307086', 'ana.souza@fiap.com', 'senha123'),
+       (2, 'Bruno Lima', '2000-08-21', '69386026031', 'bruno.lima@fiap.com', 'senha123'),
+       (2, 'Carlos Pereira', '1999-07-10', '48133677041', 'carlos.pereira@fiap.com', 'senha123'),
+       (2, 'Daniela Alves', '2002-02-20', '30816457000', 'daniela.alves@fiap.com', 'senha123'),
+       (2, 'Eduardo Ramos', '2003-12-05', '36135875051', 'eduardo.ramos@fiap.com', 'senha123'),
+       (2, 'Fernanda Dias', '1998-04-30', '35184798064', 'fernanda.dias@fiap.com', 'senha123'),
+       (2, 'Gabriel Martins', '2001-06-12', '10971508011', 'gabriel.martins@fiap.com', 'senha123'),
+       (2, 'Helena Costa', '2002-11-18', '36932070030', 'helena.costa@fiap.com', 'senha123'),
+       (2, 'Igor Rocha', '2000-09-03', '91763238032', 'igor.rocha@fiap.com', 'senha123'),
+       (2, 'Juliana Melo', '1999-05-25', '17397570097', 'juliana.melo@fiap.com', 'senha123'),
+       (2, 'Kleber Torres', '2001-01-01', '18767380069', 'kleber.torres@fiap.com', 'senha123'),
+       (2, 'Larissa Campos', '2002-02-02', '13257645074', 'larissa.campos@fiap.com', 'senha123'),
+       (2, 'Marcelo Borges', '2003-03-03', '43806550085', 'marcelo.borges@fiap.com', 'senha123'),
+       (2, 'Natália Farias', '2000-04-04', '80943347033', 'natalia.farias@fiap.com', 'senha123'),
+       (2, 'Otávio Silva', '2001-05-05', '42364603005', 'otavio.silva@fiap.com', 'senha123');
 
 
 INSERT INTO courses (name, description)
