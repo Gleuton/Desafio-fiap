@@ -2,6 +2,8 @@
 
 namespace FiapAdmin\Repositories;
 
+use FiapAdmin\Models\Course\Course;
+
 class CourseRepository extends Repository
 {
     protected string $table = 'courses';
@@ -33,8 +35,12 @@ class CourseRepository extends Repository
         return $this->query($sql)[0]['total'];
     }
 
-    public function saveCourse(array $data): array
+    public function saveCourse(Course $course): array
     {
+        $data = [
+            'name' => $course->name()->value(),
+            'description' => $course->description()->value()
+        ];
         $newId = $this->insert($data);
         return $this->findById($newId);
     }
@@ -60,9 +66,14 @@ class CourseRepository extends Repository
         return $this->findById($id);
     }
 
-    public function updateCourse(int $id, array $data): bool
+    public function updateCourse(Course $course): bool
     {
-       return $this->update($id, $data);
+        $id = $course->id();
+        $data = [
+            'name' => $course->name()->value(),
+            'description' => $course->description()->value()
+        ];
+        return $this->update($id, $data);
     }
 
     public function hasEnrollments(int $id): bool

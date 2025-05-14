@@ -12,8 +12,11 @@ readonly class Email
     public function __construct(
         private string $email
     ) {
+        if (empty($this->email)) {
+            throw new ValidationException('email', 'E-mail é um campo obrigatório');
+        }
         if (!$this->isValid()) {
-            throw new ValidationException('email', 'E-Mail inválido');
+            throw new ValidationException('email', 'E-mail inválido');
         }
     }
 

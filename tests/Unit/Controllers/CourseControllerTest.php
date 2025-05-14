@@ -3,7 +3,9 @@
 namespace Tests\Unit\Controllers;
 
 use FiapAdmin\Controllers\CourseController;
+use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Course\Course;
+use FiapAdmin\Models\Course\CourseService;
 use Laminas\Diactoros\Response\JsonResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -12,12 +14,12 @@ use Psr\Http\Message\StreamInterface;
 
 class CourseControllerTest extends TestCase
 {
-    private MockObject|Course $courseMock;
+    private MockObject|CourseService $courseMock;
     private CourseController $controller;
 
     protected function setUp(): void
     {
-        $this->courseMock = $this->createMock(Course::class);
+        $this->courseMock = $this->createMock(CourseService::class);
         $this->controller = new CourseController($this->courseMock);
     }
 
@@ -41,13 +43,18 @@ class CourseControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $body = $this->createMock(StreamInterface::class);
 
-        $body->method('getContents')->willReturn(json_encode(['name' => 'PHP Course']));
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => 'PHP Course',
+            'description' => 'Learn PHP programming with this comprehensive course'
+        ]));
         $request->method('getBody')->willReturn($body);
 
-        $this->courseMock->method('create')->willReturn([
-            'success' => true,
-            'id' => 1
-        ]);
+        $this->courseMock->method('create')
+            ->with($this->isInstanceOf(Course::class))
+            ->willReturn([
+                'success' => true,
+                'id' => 1
+            ]);
 
         $response = $this->controller->create($request);
 
@@ -60,13 +67,15 @@ class CourseControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $body = $this->createMock(StreamInterface::class);
 
-        $body->method('getContents')->willReturn(json_encode(['name' => ''], JSON_THROW_ON_ERROR));
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => '',
+            'description' => 'Test description'
+        ], JSON_THROW_ON_ERROR));
         $request->method('getBody')->willReturn($body);
 
-        $this->courseMock->method('create')->willReturn([
-            'success' => false,
-            'errors' => ['name' => 'Name is required']
-        ]);
+        // Mock ValidationException being thrown when creating the Course
+        $this->courseMock->method('create')
+            ->will($this->throwException(new ValidationException('name', 'Name is required')));
 
         $response = $this->controller->create($request);
 
@@ -119,12 +128,17 @@ class CourseControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $body = $this->createMock(StreamInterface::class);
 
-        $body->method('getContents')->willReturn(json_encode(['name' => 'Updated Name']));
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => 'Updated Name',
+            'description' => 'Updated description for the course'
+        ]));
         $request->method('getBody')->willReturn($body);
 
-        $this->courseMock->method('update')->with(1, ['name' => 'Updated Name'])->willReturn([
-            'success' => true
-        ]);
+        $this->courseMock->method('update')
+            ->with($this->isInstanceOf(Course::class))
+            ->willReturn([
+                'success' => true
+            ]);
 
         $response = $this->controller->update($request, 1);
 
@@ -136,13 +150,15 @@ class CourseControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $body = $this->createMock(StreamInterface::class);
 
-        $body->method('getContents')->willReturn(json_encode(['name' => '']));
+        $body->method('getContents')->willReturn(json_encode([
+            'name' => '',
+            'description' => 'Test description'
+        ]));
         $request->method('getBody')->willReturn($body);
 
-        $this->courseMock->method('update')->with(1, ['name' => ''])->willReturn([
-            'success' => false,
-            'errors' => ['name' => 'Name cannot be empty']
-        ]);
+        // Mock ValidationException being thrown when creating the Course
+        $this->courseMock->method('update')
+            ->will($this->throwException(new ValidationException('name', 'Name cannot be empty')));
 
         $response = $this->controller->update($request, 1);
 

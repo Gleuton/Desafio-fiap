@@ -25,6 +25,9 @@ class NameTest extends TestCase
             'longer name' => ['Elizabeth'],
             'with spaces' => ['Ana Maria'],
             'with hyphen' => ['Jean-Luc'],
+            'with numbers' => ['John123'],
+            'with apostrophe' => ['O\'Connor'],
+            'with leading/trailing spaces' => [' John '],
         ];
     }
 
@@ -42,6 +45,9 @@ class NameTest extends TestCase
             'empty string' => [''],
             'three spaces' => ['   '],
             'three chars letters' => ['Ana'],
+            'four chars with spaces' => ['A B'],
+            'exactly 3 chars with trailing space' => ['Ana '],
+            'exactly 3 chars with leading space' => [' Ana'],
         ];
     }
 }

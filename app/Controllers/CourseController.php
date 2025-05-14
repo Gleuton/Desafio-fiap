@@ -2,7 +2,12 @@
 
 namespace FiapAdmin\Controllers;
 
+use Exception;
+use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Course\Course;
+use FiapAdmin\Models\Course\CourseService;
+use FiapAdmin\Models\Description;
+use FiapAdmin\Models\Name;
 use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -11,8 +16,19 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 readonly class CourseController
 {
-    public function __construct(private Course $course)
+    public function __construct(private CourseService $course)
     {
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function createCourse(array $data, ?int $id = null): Course
+    {
+        $name = new Name($data['name']);
+        $description = new Description($data['description']);
+
+        return new Course($id, $name, $description);
     }
 
     public function index(ServerRequestInterface $request): JsonResponse
@@ -23,20 +39,27 @@ readonly class CourseController
         return new JsonResponse($this->course->index($page, $limit));
     }
 
-    /**
-     * @throws JsonException
-     */
     public function create(Request $request): Response
     {
-        $body = $request->getBody();
-        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
-        $result = $this->course->create($data);
+        try {
+            $body = $request->getBody();
+            $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!$result['success']) {
-            return new JsonResponse($result['errors'], 422);
+            $course = $this->createCourse($data);
+            $result = $this->course->create($course);
+
+            return new JsonResponse($result, 201);
+        } catch (ValidationException $e) {
+            return new JsonResponse(
+                ['error' => [$e->getField() => $e->getMessage()]],
+                422
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['Error' => $e->getMessage()],
+                500
+            );
         }
-
-        return new JsonResponse($result, 201);
     }
 
     public function show(Request $request, int $id): Response
@@ -55,14 +78,24 @@ readonly class CourseController
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $body = $request->getBody();
-        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
-        $result = $this->course->update($id, $data);
+        try {
+            $body = $request->getBody();
+            $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!$result['success']) {
-            return new JsonResponse($result['errors'], 422);
+            $course = $this->createCourse($data, $id);
+            $result = $this->course->update($course);
+
+            return new JsonResponse($result, 201);
+        } catch (ValidationException $e) {
+            return new JsonResponse(
+                ['error' => [$e->getField() => $e->getMessage()]],
+                422
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['error' => $e->getMessage()],
+                500
+            );
         }
-
-        return new JsonResponse($result, 201);
     }
 }

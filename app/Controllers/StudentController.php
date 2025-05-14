@@ -30,9 +30,6 @@ readonly class StudentController
         return new JsonResponse($this->student->all($studentName, $limit));
     }
 
-    /**
-     * @throws JsonException
-     */
     public function create(Request $request): Response
     {
         try {
@@ -42,9 +39,8 @@ readonly class StudentController
             $student = $this->student($data);
             $result = $this->student->create($student);
         } catch (ValidationException $e) {
-            $jsonException = json_decode($e->getMessage(), true, 512, JSON_THROW_ON_ERROR);
             return new JsonResponse(
-                ['error' => $jsonException],
+                ['error' => [$e->getField() => $e->getMessage()]],
                 422
             );
         } catch (Exception $e) {
@@ -75,9 +71,8 @@ readonly class StudentController
             $student = $this->student($data);
             $result = $this->student->update($student);
         } catch (ValidationException $e) {
-            $jsonException = json_decode($e->getMessage(), true, 512, JSON_THROW_ON_ERROR);
             return new JsonResponse(
-                ['error' => $jsonException],
+                ['error' => [$e->getField() => $e->getMessage()]],
                 422
             );
         } catch (Exception $e) {

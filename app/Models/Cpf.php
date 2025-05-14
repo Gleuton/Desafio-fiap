@@ -11,6 +11,10 @@ readonly class Cpf
      */
     public function __construct(private string $cpf)
     {
+        if (empty($this->cpf)) {
+            throw new ValidationException('cpf', 'Cpf é um campo obrigatório');
+        }
+
         if (!$this->isValid()) {
             throw new ValidationException('cpf', 'Cpf inválido');
         }
