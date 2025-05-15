@@ -41,9 +41,6 @@ class EnrollmentRepository extends Repository
 
         return $this->query($sql)[0]['total'];
     }
-    /**
-     * @throws ValidationException
-     */
     public function isEnrolled(int $studentId, int $courseId): bool
     {
         $sql = "SELECT * FROM $this->table 
@@ -56,18 +53,11 @@ class EnrollmentRepository extends Repository
 
         $result = $this->query($sql, $params);
 
-        if (!empty($result)) {
-            throw new ValidationException('enrollment', 'Este aluno já está matriculado nesta turma!');
-        }
-        return false;
+        return !empty($result);
     }
 
-    /**
-     * @throws ValidationException
-     */
     public function saveEnrollment(array $data): array
     {
-        $this->isEnrolled($data['user_id'], $data['course_id']);
         $newId = $this->insert($data);
         return $this->findById($newId);
     }
@@ -88,12 +78,8 @@ class EnrollmentRepository extends Repository
         return $this->query($sql, $params);
     }
 
-    /**
-     * @throws ValidationException
-     */
     public function updateEnrollment(int $id, array $data): bool
     {
-        $this->isEnrolled($data['user_id'], $data['course_id']);
         return $this->update($id, $data);
     }
 }

@@ -12,6 +12,16 @@ readonly class EnrollmentService
     ) {
     }
 
+    /**
+     * @throws ValidationException
+     */
+    private function checkIfAlreadyEnrolled(int $studentId, int $courseId): void
+    {
+        if ($this->repository->isEnrolled($studentId, $courseId)) {
+            throw new ValidationException('enrollment', 'Este aluno já está matriculado nesta turma!');
+        }
+    }
+
     public function index(int $page = 1, int $limit = 10): array
     {
         $total = $this->repository->countTotal();
@@ -26,8 +36,13 @@ readonly class EnrollmentService
         ];
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function create(Enrollment $enrollment): array
     {
+        $this->checkIfAlreadyEnrolled($enrollment->userId(), $enrollment->courseId());
+
         $data = $enrollment->toArray();
         $result = $this->repository->saveEnrollment($data);
 
@@ -52,6 +67,8 @@ readonly class EnrollmentService
      */
     public function update(Enrollment $enrollment): array
     {
+        $this->checkIfAlreadyEnrolled($enrollment->userId(), $enrollment->courseId());
+
         $data = $enrollment->toArray();
         $result = $this->repository->updateEnrollment($enrollment->id(), $data);
 
