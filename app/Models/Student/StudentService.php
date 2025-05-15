@@ -30,6 +30,14 @@ readonly class StudentService
      */
     public function create(Student $student): array
     {
+        if ($this->repository->cpfExists($student->cpf())) {
+            throw new ValidationException('cpf', 'CPF já cadastrado');
+        }
+
+        if ($this->repository->emailExists($student->email())) {
+            throw new ValidationException('email', 'E-mail já cadastrado');
+        }
+
         return [
             'success' => $this->repository->saveStudent($student),
         ];
@@ -40,6 +48,16 @@ readonly class StudentService
      */
     public function update(Student $student): array
     {
+        $id = $student->id();
+
+        if ($this->repository->cpfExists($student->cpf(), $id)) {
+            throw new ValidationException('cpf', 'CPF já cadastrado');
+        }
+
+        if ($this->repository->emailExists($student->email(), $id)) {
+            throw new ValidationException('email', 'E-mail já cadastrado');
+        }
+
         return [
             'success' => $this->repository->updateStudent($student),
         ];
