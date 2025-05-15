@@ -92,7 +92,7 @@ class EnrollmentsControllerTest extends TestCase
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(422, $response->getStatusCode());
-        $this->assertEquals(['errors' => [$field => $errorMessage]], $response->getPayload());
+        $this->assertEquals(['error' => [$field => $errorMessage]], $response->getPayload());
     }
 
     public function testShowReturnsData(): void
