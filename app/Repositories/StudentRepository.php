@@ -3,7 +3,6 @@
 namespace FiapAdmin\Repositories;
 
 use Core\DataBase\BuilderInterface;
-use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Student\Student;
 
 class StudentRepository extends Repository

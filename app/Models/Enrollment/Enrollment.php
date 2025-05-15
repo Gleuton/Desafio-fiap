@@ -6,6 +6,9 @@ use FiapAdmin\Exceptions\ValidationException;
 
 readonly class Enrollment
 {
+    /**
+     * @throws ValidationException
+     */
     public function __construct(
         private ?int $id,
         private int $userId,
