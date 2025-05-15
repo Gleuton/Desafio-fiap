@@ -10,17 +10,17 @@ use PHPUnit\Framework\Attributes\DataProvider;
 class CpfTest extends TestCase
 {
     #[DataProvider('validCpfProvider')]
-    public function testValidCpfCreatesInstance(string $input): void
+    public function testValidCpfCreatesInstance(string $input, string $expected): void
     {
         $cpf = new Cpf($input);
-        $this->assertSame($input, $cpf->value());
+        $this->assertSame($expected, $cpf->value());
     }
 
     public static function validCpfProvider(): array
     {
         return [
-            'plain digits' => ['11144477735'],
-            'formatted with dots and dash' => ['111.444.777-35'],
+            'plain digits' => ['11144477735', '11144477735'],
+            'formatted with dots and dash' => ['111.444.777-35', '11144477735'],
         ];
     }
 
@@ -28,6 +28,7 @@ class CpfTest extends TestCase
     public function testInvalidCpfThrowsException(string $input): void
     {
         $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Cpf inválido');
         new Cpf($input);
     }
 
