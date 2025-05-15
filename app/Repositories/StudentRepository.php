@@ -3,7 +3,6 @@
 namespace FiapAdmin\Repositories;
 
 use Core\DataBase\BuilderInterface;
-use FiapAdmin\Exceptions\ValidationException;
 use FiapAdmin\Models\Student\Student;
 
 class StudentRepository extends Repository
@@ -39,40 +38,18 @@ class StudentRepository extends Repository
         return $this->query($sql);
     }
 
-    /**
-     * @throws ValidationException
-     */
     public function saveStudent(Student $student): array
     {
         $data = $this->mapStudentToArray($student);
-
-        if ($this->cpfExists($data['cpf'])) {
-            throw new ValidationException('cpf', 'CPF já cadastrado');
-        }
-
-        if ($this->emailExists($data['email'])) {
-            throw new ValidationException('email', 'E-mail já cadastrado');
-        }
 
         $newId = $this->insert($data);
         return $this->findById($newId);
     }
 
-    /**
-     * @throws ValidationException
-     */
     public function updateStudent(Student $student): array
     {
         $id = $student->id();
         $data = $this->mapStudentToArray($student);
-
-        if ($this->cpfExists($data['cpf'], $id)) {
-            throw new ValidationException('cpf', 'CPF já cadastrado');
-        }
-
-        if ($this->emailExists($data['email'], $id)) {
-            throw new ValidationException('email', 'E-mail já cadastrado');
-        }
 
         $this->update($id, $data);
         return $this->findById($id);

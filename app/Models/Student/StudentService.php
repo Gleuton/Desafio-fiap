@@ -30,6 +30,8 @@ readonly class StudentService
      */
     public function create(Student $student): array
     {
+        $this->checkForDuplicateStudent($student);
+
         return [
             'success' => $this->repository->saveStudent($student),
         ];
@@ -40,6 +42,10 @@ readonly class StudentService
      */
     public function update(Student $student): array
     {
+        $id = $student->id();
+
+        $this->checkForDuplicateStudent($student, $id);
+
         return [
             'success' => $this->repository->updateStudent($student),
         ];
@@ -61,5 +67,19 @@ readonly class StudentService
             'success' => $this->repository->delete($id),
             'id' => $id
         ];
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function checkForDuplicateStudent(Student $student, ?int $id = null): void
+    {
+        if ($this->repository->cpfExists($student->cpf(), $id)) {
+            throw new ValidationException('cpf', 'CPF já cadastrado');
+        }
+
+        if ($this->repository->emailExists($student->email(), $id)) {
+            throw new ValidationException('email', 'E-mail já cadastrado');
+        }
     }
 }
