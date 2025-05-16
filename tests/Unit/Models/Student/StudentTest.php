@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Models\Student;
 
-use DateTime;
+use FiapAdmin\Models\Birthdate;
 use FiapAdmin\Models\Student\Student;
 use FiapAdmin\Models\Name;
 use FiapAdmin\Models\Cpf;
@@ -23,7 +23,7 @@ class StudentTest extends TestCase
         $emailMock = $this->createMock(Email::class);
         $emailMock->method('value')->willReturn('maria.silva@example.com');
 
-        $birthdate = new DateTime('2000-05-15');
+        $birthdate = new Birthdate('2000-05-15');
 
         $passwordMock = $this->createMock(Password::class);
         $passwordMock->method('value')->willReturn('hashed_password');
@@ -52,7 +52,7 @@ class StudentTest extends TestCase
         $cpfMock = $this->createMock(Cpf::class);
         $emailMock = $this->createMock(Email::class);
 
-        $birthdate = new DateTime('1995-12-01');
+        $birthdate = new Birthdate('1995-12-01');
 
         $student = new Student(
             null,

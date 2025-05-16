@@ -2,10 +2,9 @@
 
 namespace FiapAdmin\Controllers;
 
-use DateMalformedStringException;
-use DateTime;
 use Exception;
 use FiapAdmin\Exceptions\ValidationException;
+use FiapAdmin\Models\Birthdate;
 use FiapAdmin\Models\Cpf;
 use FiapAdmin\Models\Email;
 use FiapAdmin\Models\Name;
@@ -92,12 +91,11 @@ readonly class StudentController
 
     /**
      * @throws ValidationException
-     * @throws DateMalformedStringException
      */
     private function student(array $data): Student
     {
         $name = new Name($data['name']);
-        $birthdate = new DateTime($data['birthdate']);
+        $birthdate = new Birthdate($data['birthdate']);
         $cpf = new Cpf($data['cpf']);
         $email = new Email($data['email']);
         $password = empty($data['password']) ? null : new Password($data['password']);
