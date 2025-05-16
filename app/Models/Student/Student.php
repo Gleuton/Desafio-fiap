@@ -2,7 +2,7 @@
 
 namespace FiapAdmin\Models\Student;
 
-use DateTime;
+use FiapAdmin\Models\Birthdate;
 use FiapAdmin\Models\Cpf;
 use FiapAdmin\Models\Email;
 use FiapAdmin\Models\Name;
@@ -17,7 +17,7 @@ readonly class Student
         private Name $name,
         private Cpf $cpf,
         private Email $email,
-        private DateTime $birthdate,
+        private Birthdate $birthdate,
         private ?Password $password,
     ) {
     }
@@ -44,7 +44,7 @@ readonly class Student
 
     public function birthdate(): string
     {
-        return $this->birthdate->format('Y-m-d');
+        return $this->birthdate->value();
     }
 
     public function password(): ?string

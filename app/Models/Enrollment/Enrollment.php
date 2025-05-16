@@ -45,8 +45,7 @@ readonly class Enrollment
             throw new ValidationException('O ID da turma é obrigatório', 'course_id');
         }
     }
-
-
+    
     public function toArray(): array
     {
         return [
